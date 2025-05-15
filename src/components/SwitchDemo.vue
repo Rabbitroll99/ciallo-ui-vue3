@@ -1,3 +1,3 @@
 <template>
-  <div>Switch的文档</div>
+  <div>Switch示例</div>
 </template>
