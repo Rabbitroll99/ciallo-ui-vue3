@@ -10,12 +10,21 @@ export default {
   name: "App",
   setup() {
     const width = document.documentElement.clientWidth;
-    // console.log(width)
-    const asideVisible = ref(width <= 500 ? false : true);
-    provide("asideVisible", asideVisible); //set
-    router.afterEach(() => {
-      if (width <= 500) {
+    const asideVisible = ref(width <= 500 ? true : true);
+    provide("asideVisible", asideVisible);
+
+    router.afterEach((to) => {
+      if (width <= 500 && to.path.startsWith("/doc/")) {
         asideVisible.value = false;
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      const newWidth = document.documentElement.clientWidth;
+      if (newWidth <= 500) {
+        if (window.location.hash.includes("/doc/")) {
+          asideVisible.value = false;
+        }
       }
     });
   },

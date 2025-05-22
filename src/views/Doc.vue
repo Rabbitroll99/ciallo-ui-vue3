@@ -1,21 +1,29 @@
 <template>
   <div class="layout">
-    <Topnav class="nav" />
-    <div class="content">
+    <Topnav class="nav" :toggleMenuButtonVisible="showMenuButton" />
+    <div class="content" :class="{ 'aside-visible': asideVisible }">
       <aside v-if="asideVisible">
         <h2>组件列表</h2>
         <ol>
           <li>
-            <router-link to="/doc/switch">Switch组件</router-link>
+            <router-link to="/doc/switch" @click="hideAside"
+              >Switch组件</router-link
+            >
           </li>
           <li>
-            <router-link to="/doc/button">Button组件</router-link>
+            <router-link to="/doc/button" @click="hideAside"
+              >Button组件</router-link
+            >
           </li>
           <li>
-            <router-link to="/doc/dialog">Dialog组件</router-link>
+            <router-link to="/doc/dialog" @click="hideAside"
+              >Dialog组件</router-link
+            >
           </li>
           <li>
-            <router-link to="/doc/tabs">Tabs组件</router-link>
+            <router-link to="/doc/tabs" @click="hideAside"
+              >Tabs组件</router-link
+            >
           </li>
         </ol>
       </aside>
@@ -25,17 +33,50 @@
     </div>
   </div>
 </template>
+
 <script lang="ts">
-import { inject, Ref } from "vue";
+import { inject, Ref, computed, ref, onMounted, onUnmounted } from "vue";
+import { useRoute } from "vue-router";
 import Topnav from "../components/Topnav.vue";
+
 export default {
   components: { Topnav },
   setup() {
-    const asideVisible = inject<Ref<boolean>>("asideVisible");
-    return { asideVisible };
+    const route = useRoute();
+    const asideVisible = inject<Ref<boolean>>("asideVisible", ref(false));
+    const isMobile = ref(window.innerWidth <= 500);
+
+    const showMenuButton = computed(() => {
+      return isMobile.value;
+    });
+
+    const hideAside = () => {
+      if (window.innerWidth <= 500 && asideVisible) {
+        asideVisible.value = false;
+      }
+    };
+
+    const handleResize = () => {
+      isMobile.value = window.innerWidth <= 500;
+    };
+
+    onMounted(() => {
+      window.addEventListener("resize", handleResize);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener("resize", handleResize);
+    });
+
+    return {
+      asideVisible,
+      showMenuButton,
+      hideAside,
+    };
   },
 };
 </script>
+
 <style lang="scss" scoped>
 .layout {
   display: flex;
@@ -48,11 +89,18 @@ export default {
     flex-grow: 1;
     padding-top: 60px;
     padding-left: 156px;
+    transition: padding-left 0.3s;
+
     @media (max-width: 500px) {
       padding-left: 0;
+
+      &.aside-visible {
+        padding-left: 150px;
+      }
     }
   }
 }
+
 .content {
   display: flex;
   > aside {
@@ -64,6 +112,7 @@ export default {
     background: white;
   }
 }
+
 aside {
   background: lightblue;
   width: 150px;
@@ -73,6 +122,8 @@ aside {
   left: 0;
   padding-top: 70px;
   height: 100%;
+  z-index: 1;
+
   > h2 {
     margin-bottom: 4px;
   }
