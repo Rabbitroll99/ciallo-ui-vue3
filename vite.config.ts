@@ -21,12 +21,16 @@ export default defineConfig({
       name: 'demo-transform',
       transform(code, id) {
         if (id.includes('?vue&type=demo')) {
-          const file = fs.readFileSync(id.split('?')[0]).toString()
-          const parsed = parse(file).descriptor.customBlocks.find(n => n.type === 'demo')
-          if (!parsed) return null
+          const filePath = id.split('?')[0]
+          const file = fs.readFileSync(filePath).toString()
+          const parsed = parse(file)
+          const demoBlock = parsed.descriptor.customBlocks.find(n => n.type === 'demo')
           
-          const title = parsed.content
-          const main = file.split(parsed.loc.source).join('').trim()
+          if (!demoBlock || !demoBlock.content) return null
+          
+          const title = demoBlock.content.trim()
+          const main = file.trim()
+          
           return `export default function (Component) {
             Component.__sourceCode = ${JSON.stringify(main)}
             Component.__sourceCodeTitle = ${JSON.stringify(title)}
