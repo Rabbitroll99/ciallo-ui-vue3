@@ -4,39 +4,41 @@
     <div class="demo">
       <h2>常规用法</h2>
       <div class="demo-component">
-        <Switch1Demo />
+        <component :is="Switch1Demo" />
       </div>
       <div class="demo-actions">
         <Button @click="toggleCode(1)">查看代码</Button>
       </div>
       <div class="demo-code" v-if="showCode1">
-        <pre>{{sourceCode1}}</pre>
+        <pre v-html="Prism.highlight(sourceCode1, Prism.languages.html, 'html')"/>
       </div>
     </div>
     <div class="demo">
       <h2>支持 disabled</h2>
       <div class="demo-component">
-        <Switch2Demo/>
+        <component :is="Switch2Demo" />
       </div>
       <div class="demo-actions">
         <Button @click="toggleCode(2)">查看代码</Button>
       </div>
       <div class="demo-code" v-if="showCode2">
-        <pre>{{sourceCode2}}</pre>
+        <pre v-html="Prism.highlight(sourceCode2, Prism.languages.html, 'html')"/>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Switch from "../lib/Switch.vue";
 import Button from "../lib/Button.vue";
 import { ref } from "vue";
 import Switch1Demo from "./Switch1.demo.vue";
 import Switch2Demo from "./Switch2.demo.vue";
+import "prismjs";
+import "prismjs/themes/prism.css";
+const Prism = (window as any).Prism;
 
 export default {
-  components: { Switch, Button, Switch1Demo, Switch2Demo },
+  components: { Button },
   setup() {
     const bool = ref(false);
     const showCode1 = ref(false);
@@ -64,7 +66,10 @@ export default {
       showCode2, 
       sourceCode1, 
       sourceCode2,
-      toggleCode
+      toggleCode,
+      Switch1Demo,
+      Switch2Demo,
+      Prism,
     };
   },
 };
