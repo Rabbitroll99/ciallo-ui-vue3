@@ -44,6 +44,7 @@ export default {
 };
 </script>
 <style lang="scss">
+@use "sass:color";
 $h: 32px;
 $border-color: #d9d9d9;
 $color: #333;
@@ -64,7 +65,7 @@ $grey: grey;
   color: $color;
   border: 1px solid $border-color;
   border-radius: $radius;
-  box-shadow: 0 1px 0 fade-out(black, 0.95);
+  box-shadow: 0 1px 0 color.adjust(black, $alpha: -0.95);
   transition: background 250ms;
   & + & {
     margin-left: 8px;
@@ -86,7 +87,7 @@ $grey: grey;
     color: $blue;
     &:hover,
     &:focus {
-      color: lighten($blue, 10%);
+      color: color.scale($blue, $lightness: 10%);
     }
   }
   &.ciallo-theme-text {
@@ -95,7 +96,7 @@ $grey: grey;
     color: inherit;
     &:hover,
     &:focus {
-      background: darken(white, 5%);
+      background: color.adjust(white, $lightness: -5%);
     }
   }
   &.ciallo-size-big {
@@ -115,8 +116,8 @@ $grey: grey;
       border-color: $blue;
       &:hover,
       &:focus {
-        background: darken($blue, 10%);
-        border-color: darken($blue, 10%);
+        background: color.adjust($blue, $lightness: -10%);
+        border-color: color.adjust($blue, $lightness: -10%);
       }
     }
     &.ciallo-level-danger {
@@ -125,8 +126,8 @@ $grey: grey;
       color: white;
       &:hover,
       &:focus {
-        background: darken($red, 10%);
-        border-color: darken($red, 10%);
+        background: color.adjust($red, $lightness: -10%);
+        border-color: color.adjust($red, $lightness: -10%);
       }
     }
   }
@@ -135,7 +136,7 @@ $grey: grey;
       color: $red;
       &:hover,
       &:focus {
-        color: darken($red, 10%);
+        color: color.adjust($red, $lightness: -10%);
       }
     }
   }
@@ -144,14 +145,14 @@ $grey: grey;
       color: $blue;
       &:hover,
       &:focus {
-        color: darken($blue, 10%);
+        color: color.adjust($blue, $lightness: 10%);
       }
     }
     &.ciallo-level-danger {
       color: $red;
       &:hover,
       &:focus {
-        color: darken($red, 10%);
+        color: color.adjust($red, $lightness: 10%);
       }
     }
   }

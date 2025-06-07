@@ -72,13 +72,14 @@ export default {
 </script>
 
 <style lang="scss">
+@use "sass:color";
 $radius: 4px;
 $border-color: #d9d9d9;
 
 .ciallo-dialog {
-  background: white;
+  background: color.adjust(black, $alpha: -0.5);
   border-radius: $radius;
-  box-shadow: 0 0 3px fade_out(black, 0.5);
+  box-shadow: 0 0 3px color.adjust(black, $alpha: -0.5);
   min-width: 15em;
   max-width: 90%;
 
@@ -88,7 +89,7 @@ $border-color: #d9d9d9;
     left: 0;
     width: 100%;
     height: 100%;
-    background: fade_out(black, 0.5);
+    background: color.adjust(black, $alpha: -0.5);
     z-index: 10;
   }
 
