@@ -96,8 +96,8 @@ $overlay-color: rgba(0, 0, 0, 0.5);
     border-radius: $radius;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     min-width: 15em;
-    max-width: 90%;
-    width: 420px;
+    max-width: 90vw;
+    width: min(420px, 90vw);
   }
 
   >header {
