@@ -1,5 +1,5 @@
 <template>
-  <button class="ciallo-switch" @click="toggle" :class="{ 'ciallo-checked': value }">
+  <button class="ciallo-switch" @click="toggle" :class="{ 'ciallo-checked': value, 'ciallo-disabled': disabled }">
     <span> </span>
   </button>
   <div>{{ value }}</div>
@@ -8,9 +8,14 @@
 export default {
   props: {
     value: Boolean,
+    disabled: {
+      type: Boolean,
+      default: false
+    }
   },
   setup(props, context) {
     const toggle = () => {
+      if (props.disabled) return;
       context.emit("update:value", !props.value);
     };
     return { toggle };
@@ -30,6 +35,7 @@ $h2: $h - 4px;
   background: #bfbfbf;
   border-radius: math.div($h, 2);
   position: relative;
+  cursor: pointer;
 
   >span {
     position: absolute;
@@ -65,6 +71,11 @@ $h2: $h - 4px;
       width: $h2 + 4px;
       margin-left: -4px;
     }
+  }
+
+  &.ciallo-disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 }
 </style>
