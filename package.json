@@ -6,8 +6,10 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@types/three": "^0.177.0",
     "github-markdown-css": "^5.8.1",
     "prismjs": "^1.30.0",
+    "three": "^0.177.0",
     "vue": "^3.4.15",
     "vue-router": "^4.2.5"
   },
