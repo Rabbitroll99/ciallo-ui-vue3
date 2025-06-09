@@ -5,9 +5,9 @@
       <aside v-if="asideVisible">
         <h2>文档</h2>
         <ol>
-          <li><router-link to="/doc/intro">介绍</router-link></li>
-          <li><router-link to="/doc/install">安装</router-link></li>
-          <li><router-link to="/doc/get-started">开始使用</router-link></li>
+          <li><router-link to="/doc/intro" @click="hideAside">介绍</router-link></li>
+          <li><router-link to="/doc/install" @click="hideAside">安装</router-link></li>
+          <li><router-link to="/doc/get-started" @click="hideAside">开始使用</router-link></li>
         </ol>
         <h2>组件列表</h2>
         <ol>
@@ -25,6 +25,7 @@
           </li>
         </ol>
       </aside>
+      <div class="mask" v-if="asideVisible && isMobile" @click="hideAside"></div>
       <main>
         <router-view />
       </main>
@@ -70,6 +71,7 @@ export default {
       asideVisible,
       showMenuButton,
       hideAside,
+      isMobile,
     };
   },
 };
@@ -109,6 +111,16 @@ $aside-index: 10;
     flex-grow: 1;
     padding: 16px;
     background: white;
+  }
+
+  >.mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: $aside-index - 1;
   }
 }
 
