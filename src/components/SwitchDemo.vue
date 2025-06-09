@@ -7,49 +7,17 @@
 </template>
 
 <script lang="ts">
-import Button from "../lib/Button.vue";
 import { ref } from "vue";
 import Switch1Demo from "./Switch1.demo.vue";
 import Switch2Demo from "./Switch2.demo.vue";
-import "prismjs";
-import "prismjs/themes/prism.css";
 import Demo from "./Demo.vue";
-const Prism = (window as any).Prism;
 
 export default {
-  components: { Button, Demo },
+  components: { Demo },
   setup() {
-    const bool = ref(false);
-    const showCode1 = ref(false);
-    const showCode2 = ref(false);
-    const sourceCode1 = ref('');
-    const sourceCode2 = ref('');
-
-    const toggleCode = (index: number) => {
-      if (index === 1) {
-        showCode1.value = !showCode1.value;
-        if (showCode1.value && !sourceCode1.value) {
-          sourceCode1.value = Switch1Demo.__sourceCode || '暂无源代码';
-        }
-      } else {
-        showCode2.value = !showCode2.value;
-        if (showCode2.value && !sourceCode2.value) {
-          sourceCode2.value = Switch2Demo.__sourceCode || '暂无源代码';
-        }
-      }
-    };
-
     return { 
-      bool, 
-      showCode1, 
-      showCode2, 
-      sourceCode1, 
-      sourceCode2,
-      toggleCode,
       Switch1Demo,
       Switch2Demo,
-      Prism,
-      Demo
     };
   },
 };
