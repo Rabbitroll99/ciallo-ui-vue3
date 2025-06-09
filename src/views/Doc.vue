@@ -12,24 +12,16 @@
         <h2>组件列表</h2>
         <ol>
           <li>
-            <router-link to="/doc/switch" @click="hideAside"
-              >Switch组件</router-link
-            >
+            <router-link to="/doc/switch" @click="hideAside">Switch组件</router-link>
           </li>
           <li>
-            <router-link to="/doc/button" @click="hideAside"
-              >Button组件</router-link
-            >
+            <router-link to="/doc/button" @click="hideAside">Button组件</router-link>
           </li>
           <li>
-            <router-link to="/doc/dialog" @click="hideAside"
-              >Dialog组件</router-link
-            >
+            <router-link to="/doc/dialog" @click="hideAside">Dialog组件</router-link>
           </li>
           <li>
-            <router-link to="/doc/tabs" @click="hideAside"
-              >Tabs组件</router-link
-            >
+            <router-link to="/doc/tabs" @click="hideAside">Tabs组件</router-link>
           </li>
         </ol>
       </aside>
@@ -89,11 +81,11 @@ export default {
   flex-direction: column;
   height: 100vh;
 
-  > .nav {
+  >.nav {
     flex-shrink: 0;
   }
 
-  > .content {
+  >.content {
     flex-grow: 1;
     padding-top: 60px;
     padding-left: 156px;
@@ -107,11 +99,11 @@ export default {
 .content {
   display: flex;
 
-  > aside {
+  >aside {
     flex-shrink: 0;
   }
 
-  > main {
+  >main {
     flex-grow: 1;
     padding: 16px;
     background: white;
@@ -128,14 +120,14 @@ aside {
   padding-top: 70px;
   height: 100%;
 
-  > h2 {
+  >h2 {
     margin-bottom: 4px;
     padding: 0 16px;
   }
 
-  > ol {
-    > li {
-      > a {
+  >ol {
+    >li {
+      >a {
         display: block;
         padding: 4px 16px;
         text-decoration: none;

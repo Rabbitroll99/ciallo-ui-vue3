@@ -52,6 +52,7 @@ $blue: #40a9ff;
 $radius: 4px;
 $red: red;
 $grey: grey;
+
 .ciallo-button {
   box-sizing: border-box;
   height: $h;
@@ -67,63 +68,77 @@ $grey: grey;
   border-radius: $radius;
   box-shadow: 0 1px 0 color.adjust(black, $alpha: -0.95);
   transition: background 250ms;
-  & + & {
+
+  &+& {
     margin-left: 8px;
   }
+
   &:hover,
   &:focus {
     color: $blue;
     border-color: $blue;
   }
+
   &:focus {
     outline: none;
   }
+
   &::-moz-focus-inner {
     border: 0;
   }
+
   &.ciallo-theme-link {
     border-color: transparent;
     box-shadow: none;
     color: $blue;
+
     &:hover,
     &:focus {
       color: color.scale($blue, $lightness: 10%);
     }
   }
+
   &.ciallo-theme-text {
     border-color: transparent;
     box-shadow: none;
     color: inherit;
+
     &:hover,
     &:focus {
       background: color.adjust(white, $lightness: -5%);
     }
   }
+
   &.ciallo-size-big {
     font-size: 24px;
     height: 48px;
     padding: 0 16px;
   }
+
   &.ciallo-size-small {
     font-size: 12px;
     height: 20px;
     padding: 0 4px;
   }
+
   &.ciallo-theme-button {
     &.ciallo-level-main {
       background: $blue;
       color: white;
       border-color: $blue;
+
       &:hover,
       &:focus {
         background: color.adjust($blue, $lightness: -10%);
         border-color: color.adjust($blue, $lightness: -10%);
       }
     }
+
     &.ciallo-level-danger {
       background: $red;
       border-color: $red;
       color: white;
+
       &:hover,
       &:focus {
         background: color.adjust($red, $lightness: -10%);
@@ -131,40 +146,49 @@ $grey: grey;
       }
     }
   }
+
   &.ciallo-theme-link {
     &.ciallo-level-danger {
       color: $red;
+
       &:hover,
       &:focus {
         color: color.adjust($red, $lightness: -10%);
       }
     }
   }
+
   &.ciallo-theme-text {
     &.ciallo-level-main {
       color: $blue;
+
       &:hover,
       &:focus {
         color: color.adjust($blue, $lightness: 10%);
       }
     }
+
     &.ciallo-level-danger {
       color: $red;
+
       &:hover,
       &:focus {
         color: color.adjust($red, $lightness: 10%);
       }
     }
   }
+
   &.ciallo-theme-button {
     &[disabled] {
       cursor: not-allowed;
       color: $grey;
+
       &:hover {
         border-color: $grey;
       }
     }
   }
+
   &.ciallo-theme-link,
   &.ciallo-theme-text {
     &[disabled] {
@@ -172,7 +196,8 @@ $grey: grey;
       color: $grey;
     }
   }
-  > .ciallo-loadingIndicator {
+
+  >.ciallo-loadingIndicator {
     width: 14px;
     height: 14px;
     display: inline-block;
@@ -184,10 +209,12 @@ $grey: grey;
     animation: ciallo-spin 1s infinite linear;
   }
 }
+
 @keyframes ciallo-spin {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }

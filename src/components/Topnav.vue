@@ -57,27 +57,27 @@ $color: #007974;
   background: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
-  > .logo {
+  >.logo {
     max-width: 6em;
     margin-right: auto;
 
-    > svg {
+    >svg {
       width: 32px;
       height: 32px;
     }
   }
 
-  > .menu {
+  >.menu {
     display: flex;
     white-space: nowrap;
     flex-wrap: nowrap;
 
-    > li {
+    >li {
       margin: 0 1em;
     }
   }
 
-  > .toggleAside {
+  >.toggleAside {
     width: 32px;
     height: 32px;
     position: absolute;
@@ -102,15 +102,15 @@ $color: #007974;
   @media (max-width: 500px) {
     padding: 12px 16px;
 
-    > .menu {
+    >.menu {
       display: none;
     }
 
-    > .logo {
+    >.logo {
       margin: 0 auto;
     }
 
-    > .toggleAside {
+    >.toggleAside {
       display: inline-block;
     }
   }

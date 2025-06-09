@@ -4,11 +4,11 @@
       <Topnav />
       <div class="banner">
         <h1>Ciallo(∠・ω< )⌒☆ UI</h1>
-        <h2>一个基于Vue3的UI框架</h2>
-        <p class="actions">
-          <a href="https://github.com">GitHub</a>
-          <router-link to="/doc">开始</router-link>
-        </p>
+            <h2>一个基于Vue3的UI框架</h2>
+            <p class="actions">
+              <a href="https://github.com">GitHub</a>
+              <router-link to="/doc">开始</router-link>
+            </p>
       </div>
     </div>
     <div class="features">
@@ -54,11 +54,9 @@ $border-radius: 4px;
 $color: #007974;
 
 .topnavAndBanner {
-  background: linear-gradient(
-    145deg,
-    rgba(227, 255, 253, 1) 0%,
-    rgba(183, 233, 230, 1) 100%
-  );
+  background: linear-gradient(145deg,
+      rgba(227, 255, 253, 1) 0%,
+      rgba(183, 233, 230, 1) 100%);
   clip-path: ellipse(80% 60% at 50% 40%);
 }
 
@@ -74,11 +72,11 @@ $color: #007974;
     width: 1200px;
   }
 
-  > ul {
+  >ul {
     display: flex;
     flex-wrap: wrap;
 
-    > li {
+    >li {
       width: 400px;
       margin: 16px 0;
       display: grid;
@@ -90,18 +88,18 @@ $color: #007974;
       grid-template-columns: 80px auto;
       grid-template-rows: 1fr auto;
 
-      > svg {
+      >svg {
         grid-area: icon;
         width: 64px;
         height: 64px;
       }
 
-      > h3 {
+      >h3 {
         grid-area: title;
         font-size: 28px;
       }
 
-      > p {
+      >p {
         grid-area: text;
       }
     }
@@ -116,7 +114,7 @@ $color: #007974;
   align-items: center;
   flex-direction: column;
 
-  > .actions {
+  >.actions {
     padding: 8px 0;
 
     a {

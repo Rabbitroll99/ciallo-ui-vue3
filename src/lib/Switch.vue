@@ -1,9 +1,5 @@
 <template>
-  <button
-    class="ciallo-switch"
-    @click="toggle"
-    :class="{ 'ciallo-checked': value }"
-  >
+  <button class="ciallo-switch" @click="toggle" :class="{ 'ciallo-checked': value }">
     <span> </span>
   </button>
   <div>{{ value }}</div>
@@ -26,6 +22,7 @@ export default {
 @use "sass:math";
 $h: 22px;
 $h2: $h - 4px;
+
 .ciallo-switch {
   height: $h;
   width: $h * 2;
@@ -33,7 +30,8 @@ $h2: $h - 4px;
   background: #bfbfbf;
   border-radius: math.div($h, 2);
   position: relative;
-  > span {
+
+  >span {
     position: absolute;
     top: 2px;
     left: 2px;
@@ -43,9 +41,11 @@ $h2: $h - 4px;
     border-radius: math.div($h2, 2);
     transition: all 250ms;
   }
+
   &.ciallo-checked {
     background: #1890ff;
-    > span {
+
+    >span {
       left: calc(100% - #{$h2} - 2px);
     }
   }
@@ -53,13 +53,15 @@ $h2: $h - 4px;
   &:focus {
     outline: none;
   }
+
   &:active {
-    > span {
+    >span {
       width: $h2 + 4px;
     }
   }
+
   &.ciallo-checked:active {
-    > span {
+    >span {
       width: $h2 + 4px;
       margin-left: -4px;
     }

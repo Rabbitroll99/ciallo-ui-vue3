@@ -15,7 +15,7 @@ import Demo from "./Demo.vue";
 export default {
   components: { Demo },
   setup() {
-    return { 
+    return {
       Switch1Demo,
       Switch2Demo,
     };

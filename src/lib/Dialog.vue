@@ -101,7 +101,7 @@ $border-color: #d9d9d9;
     z-index: 11;
   }
 
-  > header {
+  >header {
     padding: 12px 16px;
     border-bottom: 1px solid $border-color;
     display: flex;
@@ -110,11 +110,11 @@ $border-color: #d9d9d9;
     font-size: 20px;
   }
 
-  > main {
+  >main {
     padding: 12px 16px;
   }
 
-  > footer {
+  >footer {
     border-top: 1px solid $border-color;
     padding: 12px 16px;
     text-align: right;

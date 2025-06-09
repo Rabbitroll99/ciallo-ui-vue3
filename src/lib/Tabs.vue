@@ -1,18 +1,10 @@
 <template>
   <div class="ciallo-tabs">
     <div class="ciallo-tabs-nav" ref="container">
-      <div
-        class="ciallo-tabs-nav-item"
-        v-for="(t, index) in titles"
-        :ref="
-          (el) => {
-            if (t === selected) selectedItem = el;
-          }
-        "
-        @click="select(t)"
-        :class="{ selected: t === selected }"
-        :key="index"
-      >
+      <div class="ciallo-tabs-nav-item" v-for="(t, index) in titles" :ref="(el) => {
+        if (t === selected) selectedItem = el;
+      }
+        " @click="select(t)" :class="{ selected: t === selected }" :key="index">
         {{ t }}
       </div>
       <div class="ciallo-tabs-nav-indicator" ref="indicator"></div>

@@ -1,5 +1,7 @@
 <template>
-  <div class="ciallo-tab"><slot /></div>
+  <div class="ciallo-tab">
+    <slot />
+  </div>
 </template>
 
 <script lang="ts">

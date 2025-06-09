@@ -1,18 +1,18 @@
 <template>
-    <div class="demo">
-      <h2>{{component.__sourceCodeTitle}}</h2>
-      <div class="demo-component">
-        <component :is="component" />
-      </div>
-      <div class="demo-actions">
-        <Button @click="toggleCode">查看代码</Button>
-      </div>
-      <div class="demo-code" v-if="codeVisible">
-        <pre class="language-html" v-html="html" />
-      </div>
+  <div class="demo">
+    <h2>{{ component.__sourceCodeTitle }}</h2>
+    <div class="demo-component">
+      <component :is="component" />
     </div>
+    <div class="demo-actions">
+      <Button @click="toggleCode">查看代码</Button>
+    </div>
+    <div class="demo-code" v-if="codeVisible">
+      <pre class="language-html" v-html="html" />
+    </div>
+  </div>
 </template>
-    
+
 <script lang="ts">
 import Button from '../lib/Button.vue'
 import 'prismjs';
@@ -26,7 +26,7 @@ interface ComponentProps {
 }
 
 export default {
-  components:{Button},
+  components: { Button },
   props: {
     component: {
       type: Object as () => ComponentProps,
@@ -39,7 +39,7 @@ export default {
       if (!props.component?.__sourceCode) return ''
       return Prism.highlight(props.component.__sourceCode, Prism.languages.html, 'html')
     })
-    const toggleCode = ()=> codeVisible.value = !codeVisible.value
+    const toggleCode = () => codeVisible.value = !codeVisible.value
     return {
       Prism,
       html,
@@ -49,7 +49,7 @@ export default {
   }
 }
 </script>
-    
+
 <style lang="scss" scoped>
 $border-color: #d9d9d9;
 
