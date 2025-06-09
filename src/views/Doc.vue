@@ -2,7 +2,7 @@
   <div class="layout">
     <Topnav class="nav" :toggleMenuButtonVisible="showMenuButton" />
     <div class="content" :class="{ 'aside-visible': asideVisible }">
-      <aside v-if="asideVisible">
+      <aside :class="{ 'aside-visible': asideVisible }">
         <h2>文档</h2>
         <ol>
           <li><router-link to="/doc/intro" @click="hideAside">介绍</router-link></li>
@@ -25,7 +25,7 @@
           </li>
         </ol>
       </aside>
-      <div class="mask" v-if="asideVisible && isMobile" @click="hideAside"></div>
+      <div class="mask" :class="{ 'mask-visible': asideVisible && isMobile }" @click="hideAside"></div>
       <main>
         <router-view />
       </main>
@@ -79,6 +79,7 @@ export default {
 
 <style lang="scss" scoped>
 $aside-index: 10;
+$transition-duration: 0.3s;
 
 .layout {
   display: flex;
@@ -105,6 +106,14 @@ $aside-index: 10;
 
   >aside {
     flex-shrink: 0;
+    transform: translateX(-100%);
+    transition: transform $transition-duration ease-in-out, background-color $transition-duration ease-in-out;
+    visibility: hidden;
+
+    &.aside-visible {
+      transform: translateX(0);
+      visibility: visible;
+    }
   }
 
   >main {
@@ -121,11 +130,19 @@ $aside-index: 10;
     height: 100%;
     background: rgba(0, 0, 0, 0.3);
     z-index: $aside-index - 1;
+    opacity: 0;
+    transition: opacity $transition-duration ease-in-out;
+    visibility: hidden;
+
+    &.mask-visible {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 }
 
 aside {
-  background: lightblue;
+  background: rgba(173, 216, 230, 0.95);
   width: 150px;
   padding: 16px 0;
   position: fixed;
@@ -134,6 +151,9 @@ aside {
   padding-top: 70px;
   height: 100%;
   z-index: $aside-index;
+  backdrop-filter: blur(5px);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  transition: transform $transition-duration ease-in-out, background-color $transition-duration ease-in-out;
 
   >h2 {
     margin-bottom: 4px;
@@ -146,10 +166,11 @@ aside {
         display: block;
         padding: 4px 16px;
         text-decoration: none;
+        transition: background-color 0.3s ease-in-out;
       }
 
       .router-link-active {
-        background: white;
+        background: rgba(255, 255, 255, 0.8);
       }
     }
   }
