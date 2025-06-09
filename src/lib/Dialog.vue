@@ -75,22 +75,18 @@ export default {
 @use "sass:color";
 $radius: 4px;
 $border-color: #d9d9d9;
+$background-color: white;
+$overlay-color: rgba(0, 0, 0, 0.5);
 
 .ciallo-dialog {
-  background: color.adjust(black, $alpha: -0.5);
-  border-radius: $radius;
-  box-shadow: 0 0 3px color.adjust(black, $alpha: -0.5);
-  min-width: 15em;
-  max-width: 90%;
-
   &-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: color.adjust(black, $alpha: -0.5);
-    z-index: 10;
+    background: $overlay-color;
+    z-index: 1000;
   }
 
   &-wrapper {
@@ -98,26 +94,44 @@ $border-color: #d9d9d9;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    z-index: 11;
+    z-index: 1001;
+  }
+
+  & {
+    background: $background-color;
+    border-radius: $radius;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 15em;
+    max-width: 90%;
+    width: 420px;
   }
 
   >header {
-    padding: 12px 16px;
+    padding: 16px 24px;
     border-bottom: 1px solid $border-color;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 20px;
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.85);
   }
 
   >main {
-    padding: 12px 16px;
+    padding: 24px;
+    font-size: 14px;
+    line-height: 1.5715;
+    color: rgba(0, 0, 0, 0.65);
   }
 
   >footer {
     border-top: 1px solid $border-color;
-    padding: 12px 16px;
+    padding: 10px 24px;
     text-align: right;
+
+    .ciallo-button+.ciallo-button {
+      margin-left: 8px;
+    }
   }
 
   &-close {
@@ -126,13 +140,19 @@ $border-color: #d9d9d9;
     width: 16px;
     height: 16px;
     cursor: pointer;
+    color: rgba(0, 0, 0, 0.45);
+    transition: color 0.3s;
+
+    &:hover {
+      color: rgba(0, 0, 0, 0.75);
+    }
 
     &::before,
     &::after {
       content: "";
       position: absolute;
       height: 1px;
-      background: black;
+      background: currentColor;
       width: 100%;
       top: 50%;
       left: 50%;

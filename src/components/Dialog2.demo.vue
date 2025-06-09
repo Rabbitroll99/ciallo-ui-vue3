@@ -10,7 +10,6 @@
 <script lang="ts">
 import { Dialog, Button } from '../lib/index';
 import {
-    ref,
     h
 } from 'vue'
 import {
