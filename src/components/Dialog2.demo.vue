@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import Button from '../lib/Button.vue'
+import { Dialog, Button } from '../lib/index';
 import {
     ref,
     h
@@ -18,7 +18,8 @@ import {
 } from '../lib/openDialog'
 export default {
     components: {
-        Button
+        Button,
+        Dialog
     },
     setup() {
         const showDialog = () => {
