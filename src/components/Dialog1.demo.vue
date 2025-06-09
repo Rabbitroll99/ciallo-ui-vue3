@@ -21,9 +21,6 @@ import { Dialog, Button } from '../lib/index';
 import {
     ref
 } from 'vue'
-import {
-    openDialog
-} from '../lib/openDialog'
 export default {
     components: {
         Dialog,
@@ -35,7 +32,8 @@ export default {
             x.value = !x.value
         }
         const f1 = () => {
-            return false
+            x.value = false
+            return true
         }
         const f2 = () => { }
         return {
