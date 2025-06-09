@@ -2,31 +2,28 @@
   <router-view />
 </template>
 
-<script lang="ts">
-import { provide, ref } from "vue";
+<script setup lang="ts">
+import { provide, ref, onMounted } from "vue";
 import { router } from "./router";
 
-export default {
-  name: "App",
-  setup() {
-    const width = document.documentElement.clientWidth;
-    const asideVisible = ref(width <= 500 ? false : true);
-    provide("asideVisible", asideVisible);
+const width = document.documentElement.clientWidth;
+const asideVisible = ref(width <= 500 ? false : true);
+provide("asideVisible", asideVisible);
 
-    router.afterEach((to) => {
-      if (width <= 500 && to.path.startsWith("/doc/")) {
+router.afterEach((to) => {
+  if (width <= 500 && to.path.startsWith("/doc/")) {
+    asideVisible.value = false;
+  }
+});
+
+onMounted(() => {
+  window.addEventListener("resize", () => {
+    const newWidth = document.documentElement.clientWidth;
+    if (newWidth <= 500) {
+      if (window.location.hash.includes("/doc/")) {
         asideVisible.value = false;
       }
-    });
-
-    window.addEventListener("resize", () => {
-      const newWidth = document.documentElement.clientWidth;
-      if (newWidth <= 500) {
-        if (window.location.hash.includes("/doc/")) {
-          asideVisible.value = false;
-        }
-      }
-    });
-  },
-};
+    }
+  });
+});
 </script>

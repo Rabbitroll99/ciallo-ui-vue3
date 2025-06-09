@@ -4,22 +4,21 @@
   </button>
   <div>{{ value }}</div>
 </template>
-<script lang="ts">
-export default {
-  props: {
-    value: Boolean,
-    disabled: {
-      type: Boolean,
-      default: false
-    }
-  },
-  setup(props, context) {
-    const toggle = () => {
-      if (props.disabled) return;
-      context.emit("update:value", !props.value);
-    };
-    return { toggle };
-  },
+
+<script setup lang="ts">
+const props = defineProps({
+  value: Boolean,
+  disabled: {
+    type: Boolean,
+    default: false
+  }
+});
+
+const emit = defineEmits(['update:value']);
+
+const toggle = () => {
+  if (props.disabled) return;
+  emit("update:value", !props.value);
 };
 </script>
 

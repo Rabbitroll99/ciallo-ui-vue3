@@ -4,45 +4,43 @@
     <slot />
   </button>
 </template>
-<script lang="ts">
+
+<script setup lang="ts">
 import { computed } from "vue";
 
-export default {
-  props: {
-    theme: {
-      type: String,
-      default: "button",
-    },
-    size: {
-      type: String,
-      default: "normal",
-    },
-    level: {
-      type: String,
-      default: "normal",
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-    loading: {
-      type: Boolean,
-      default: false,
-    },
+const props = defineProps({
+  theme: {
+    type: String,
+    default: "button",
   },
-  setup(props) {
-    const { theme, size, level } = props;
-    const classes = computed(() => {
-      return {
-        [`ciallo-theme-${theme}`]: theme,
-        [`ciallo-size-${size}`]: size,
-        [`ciallo-level-${level}`]: level,
-      };
-    });
-    return { classes };
+  size: {
+    type: String,
+    default: "normal",
   },
-};
+  level: {
+    type: String,
+    default: "normal",
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const { theme, size, level } = props;
+const classes = computed(() => {
+  return {
+    [`ciallo-theme-${theme}`]: theme,
+    [`ciallo-size-${size}`]: size,
+    [`ciallo-level-${level}`]: level,
+  };
+});
 </script>
+
 <style lang="scss">
 @use "sass:color";
 $h: 32px;

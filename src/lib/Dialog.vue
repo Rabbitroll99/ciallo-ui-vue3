@@ -21,53 +21,47 @@
   </template>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Button from "./Button.vue";
-export default {
-  props: {
-    visible: {
-      type: Boolean,
-      default: false,
-    },
-    closeOnClickOverlay: {
-      type: Boolean,
-      default: true,
-    },
-    ok: {
-      type: Function,
-    },
-    cancel: {
-      type: Function,
-    },
+
+const props = defineProps({
+  visible: {
+    type: Boolean,
+    default: false,
   },
-  components: {
-    Button,
+  closeOnClickOverlay: {
+    type: Boolean,
+    default: true,
   },
-  setup(props, context) {
-    const close = () => {
-      context.emit("update:visible", false);
-    };
-    const onClickOverlay = () => {
-      if (props.closeOnClickOverlay) {
-        close();
-      }
-    };
-    const onClickOk = () => {
-      if (props.ok?.() !== false) {
-        close();
-      }
-    };
-    const onClickCancel = () => {
-      props.cancel?.();
-      close();
-    };
-    return {
-      close,
-      onClickOverlay,
-      onClickOk,
-      onClickCancel,
-    };
+  ok: {
+    type: Function,
   },
+  cancel: {
+    type: Function,
+  },
+});
+
+const emit = defineEmits(['update:visible']);
+
+const close = () => {
+  emit("update:visible", false);
+};
+
+const onClickOverlay = () => {
+  if (props.closeOnClickOverlay) {
+    close();
+  }
+};
+
+const onClickOk = () => {
+  if (props.ok?.() !== false) {
+    close();
+  }
+};
+
+const onClickCancel = () => {
+  props.cancel?.();
+  close();
 };
 </script>
 
