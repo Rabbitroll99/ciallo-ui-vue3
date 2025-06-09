@@ -5,6 +5,8 @@ import fs from "fs";
 import { parse } from "@vue/compiler-sfc";
 
 export default defineConfig({
+  base: "./",
+  assetsDir: "assets",
   plugins: [
     vue({
       include: [/\.vue$/, /\.md$/],
