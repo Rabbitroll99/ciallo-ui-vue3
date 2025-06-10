@@ -1,12 +1,14 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import VueMarkdown from "unplugin-vue-markdown/vite";
-import fs from "fs";
+import * as fs from "fs";
 import { parse } from "@vue/compiler-sfc";
 
 export default defineConfig({
   base: "./",
-  assetsDir: "assets",
+  build: {
+    assetsDir: "assets",
+  },
   plugins: [
     vue({
       include: [/\.vue$/, /\.md$/],
@@ -16,9 +18,7 @@ export default defineConfig({
         },
       },
     }),
-    VueMarkdown({
-      // 这里可以根据需要添加配置项，比如 wrapperComponent, markdownItOptions 等
-    }),
+    VueMarkdown({}),
     {
       name: "demo-transform",
       transform(code, id) {
@@ -44,4 +44,12 @@ export default defineConfig({
       },
     },
   ],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: "modern-compiler",
+        silenceDeprecations: ["legacy-js-api"],
+      },
+    },
+  },
 });

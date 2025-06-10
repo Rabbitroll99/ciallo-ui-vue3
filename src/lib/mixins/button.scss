@@ -1,0 +1,303 @@
+// 按钮样式混合函数集合
+// 提供可复用的按钮样式组件，支持主题系统和高性能渲染
+
+@use "sass:color";
+@use "../tokens/colors.scss" as *;
+@use "../tokens/size.scss" as *;
+@use "../tokens/css-vars.scss" as *;
+
+/**
+ * 按钮基础样式混合
+ * 设置所有按钮共同的基础样式属性
+ */
+@mixin button-base {
+  // 盒模型和布局
+  box-sizing: border-box;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  
+  // 交互行为
+  cursor: pointer;
+  user-select: none;
+  
+  // 视觉样式
+  border: 1px solid theme-var(border-color-base);
+  border-radius: $border-radius-base;
+  font-family: inherit;
+  font-weight: 400;
+  line-height: 1.5715; // 黄金比例行高
+  
+  // 过渡动画（优化性能）
+  transition: 
+    color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  // 移除默认样式
+  &:focus {
+    outline: none;
+    // 使用box-shadow实现更美观的焦点指示器
+    box-shadow: 
+      0 0 0 2px theme-var(background-color),
+      0 0 0 4px theme-var(primary-color);
+  }
+  
+  // 移除Firefox内部边框
+  &::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+  }
+  
+  // 激活状态的视觉反馈
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+/**
+ * 按钮尺寸样式混合
+ * @param {string} $height - 按钮高度
+ * @param {string} $padding - 水平内边距
+ * @param {string} $font-size - 字体大小
+ */
+@mixin button-size($height, $padding, $font-size) {
+  height: $height;
+  padding: 0 $padding;
+  font-size: $font-size;
+  
+  // 确保最小点击区域（无障碍访问要求）
+  min-width: 44px;
+  
+  // 图标按钮的特殊处理
+  &[data-icon-only] {
+    width: $height;
+    padding: 0;
+  }
+}
+
+/**
+ * 按钮颜色变体样式混合（修复CSS变量支持）
+ * @param {string} $bg-color - 背景色
+ * @param {string} $border-color - 边框色
+ * @param {string} $text-color - 文字色
+ */
+@mixin button-variant($bg-color, $border-color, $text-color) {
+  // 确保在所有主题下都有足够的对比度
+  @media (prefers-contrast: high) {
+    &:disabled,
+    &[aria-disabled="true"] {
+      opacity: 0.8;
+      border-style: dashed;
+    }
+  }
+  
+  // 基础样式声明，使用 & {} 包装以符合新 Sass 规范
+  & {
+    background: $bg-color;
+    border-color: $border-color;
+    color: $text-color;
+  }
+  
+  // 悬停状态（CSS变量兼容版本）
+  &:hover:not(:disabled) {
+    @if $bg-color == transparent {
+      // 透明背景时使用淡色背景
+      background: theme-var(background-color-light);
+    } @else if $bg-color == theme-var(background-color) {
+      // 对于CSS变量，使用预定义的悬停色
+      background: theme-var(background-color-light);
+    } @else if $bg-color == theme-var(primary-color) {
+      background: theme-var(primary-color-hover);
+      border-color: theme-var(primary-color-hover);
+    } @else if $bg-color == theme-var(error-color) {
+      // 对于错误色，稍微加深
+      background: #e64545;
+      border-color: #e64545;
+    } @else if $bg-color == theme-var(background-color) {
+      // 对于默认背景色CSS变量，使用预定义的悬停色
+      background: theme-var(background-color-light);
+      border-color: theme-var(border-color-light);
+    } @else {
+      // 对于普通颜色值，使用color.adjust
+      background: color.adjust($bg-color, $lightness: -5%);
+      border-color: color.adjust($border-color, $lightness: -5%);
+    }
+  }
+  
+  // 激活状态
+  &:active:not(:disabled) {
+    @if $bg-color != transparent {
+      @if $bg-color == theme-var(primary-color) {
+        background: theme-var(primary-color-active);
+        border-color: theme-var(primary-color-active);
+      } @else if $bg-color == theme-var(error-color) {
+        background: #d73030;
+        border-color: #d73030;
+      } @else if $bg-color == theme-var(background-color) {
+        // 对于CSS变量，使用预定义的激活色
+        background: theme-var(background-color-base);
+        border-color: theme-var(border-color-base);
+      } @else {
+        // 只对普通颜色值使用color.adjust
+        background: color.adjust($bg-color, $lightness: -10%);
+        border-color: color.adjust($border-color, $lightness: -10%);
+      }
+    }
+  }
+  
+  // 焦点状态保持颜色不变，通过box-shadow显示焦点
+  &:focus:not(:disabled) {
+    background: $bg-color;
+    border-color: $border-color;
+    color: $text-color;
+  }
+}
+
+/**
+ * 按钮禁用状态样式混合
+ * 确保禁用状态的一致性和可访问性
+ */
+@mixin button-disabled {
+  &:disabled,
+  &[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.6;
+    pointer-events: none;
+    
+    // 移除所有交互效果
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/**
+ * 按钮组样式混合
+ * 用于创建按钮组合布局
+ */
+@mixin button-group {
+  display: inline-flex;
+  
+  // 按钮组内的按钮样式调整
+  .ciallo-button {
+    position: relative;
+    margin: 0;
+    
+    // 移除相邻按钮的边框重复
+    &:not(:first-child) {
+      margin-left: -1px;
+    }
+    
+    // 移除中间按钮的圆角
+    &:not(:first-child):not(:last-child) {
+      border-radius: 0;
+    }
+    
+    // 第一个按钮只保留左圆角
+    &:first-child:not(:last-child) {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    
+    // 最后一个按钮只保留右圆角
+    &:last-child:not(:first-child) {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+    
+    // 悬停时提升层级
+    &:hover,
+    &:focus,
+    &:active {
+      z-index: 1;
+    }
+  }
+}
+
+/**
+ * 响应式按钮样式混合
+ * 适配不同屏幕尺寸
+ */
+@mixin button-responsive {
+  // 小屏幕适配
+  @media (max-width: 768px) {
+    // 增加点击区域
+    min-height: 44px;
+    
+    // 调整间距
+    &.ciallo-size-small {
+      @include button-size($height-base, $spacing-sm, $font-size-sm);
+    }
+  }
+  
+  // 触摸设备优化
+  @media (hover: none) and (pointer: coarse) {
+    // 移除悬停效果，避免粘滞
+    &:hover {
+      background: inherit;
+      border-color: inherit;
+      transform: none;
+    }
+  }
+}
+
+/**
+ * 按钮加载状态样式混合
+ */
+@mixin button-loading {
+  &.ciallo-button-loading {
+    position: relative;
+    
+    // 禁用所有交互
+    pointer-events: none;
+    
+    // 内容半透明
+    > :not(.ciallo-loading-indicator) {
+      opacity: 0.6;
+    }
+    
+    // 加载指示器绝对定位（可选实现）
+    .ciallo-loading-indicator {
+      // 可以选择绝对定位到按钮中央
+      // position: absolute;
+      // left: 50%;
+      // top: 50%;
+      // transform: translate(-50%, -50%);
+    }
+  }
+}
+
+/**
+ * 危险按钮特殊效果混合
+ * 为危险操作提供额外的视觉警告
+ */
+@mixin button-danger-enhanced {
+  &.ciallo-level-danger {
+    position: relative;
+    overflow: hidden;
+    
+    // 添加微妙的动画效果
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+      );
+      transition: left 0.5s;
+    }
+    
+    &:hover::before {
+      left: 100%;
+    }
+  }
+} 

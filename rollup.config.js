@@ -24,7 +24,7 @@ export default {
     scss({ 
       include: /\.scss$/, 
       sass: dartSass,
-      output: false  // 不输出单独的CSS文件
+      output: false
     }),
     esbuild({
       include: /\.[jt]s$/,

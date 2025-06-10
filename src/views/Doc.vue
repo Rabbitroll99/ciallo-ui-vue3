@@ -23,6 +23,9 @@
           <li>
             <router-link to="/doc/tabs" @click="hideAside">Tabs组件</router-link>
           </li>
+          <li>
+            <router-link to="/doc/carousel" @click="hideAside">Carousel组件</router-link>
+          </li>
         </ol>
       </aside>
       <div class="mask" :class="{ 'mask-visible': asideVisible && isMobile }" @click="hideAside"></div>

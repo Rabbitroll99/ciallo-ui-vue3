@@ -1,221 +1,218 @@
 <template>
-  <button class="ciallo-button" :class="classes" :disabled="disabled">
-    <span v-if="loading" class="ciallo-loadingIndicator"></span>
+  <!-- 
+    通用按钮组件
+    支持多种主题、尺寸、级别和加载状态
+    遵循无障碍访问标准
+  -->
+  <button class="ciallo-button" :class="classes" :disabled="props.disabled || props.loading" :aria-busy="props.loading"
+    :aria-label="props.loading ? '加载中...' : undefined">
+    <!-- 加载状态指示器 -->
+    <span v-if="props.loading" class="ciallo-loading-indicator" aria-hidden="true"></span>
+    <!-- 按钮内容插槽 -->
     <slot />
   </button>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
+import type { ButtonProps } from "./types/button";
 
-const props = defineProps({
-  theme: {
-    type: String,
-    default: "button",
-  },
-  size: {
-    type: String,
-    default: "normal",
-  },
-  level: {
-    type: String,
-    default: "normal",
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
+// 组件属性定义，提供合理的默认值
+const props = withDefaults(defineProps<ButtonProps>(), {
+  theme: 'button',    // 按钮主题：button | link | text
+  size: 'normal',     // 按钮尺寸：small | normal | big
+  level: 'normal',    // 按钮级别：normal | main | danger
+  disabled: false,    // 是否禁用
+  loading: false,     // 是否显示加载状态
 });
 
-const { theme, size, level } = props;
-const classes = computed(() => {
-  return {
-    [`ciallo-theme-${theme}`]: theme,
-    [`ciallo-size-${size}`]: size,
-    [`ciallo-level-${level}`]: level,
-  };
-});
+// 计算CSS类名，优化性能避免重复计算
+const classes = computed(() => ({
+  [`ciallo-theme-${props.theme}`]: true,
+  [`ciallo-size-${props.size}`]: true,
+  [`ciallo-level-${props.level}`]: true,
+  'ciallo-button-loading': props.loading, // 加载状态标识
+}));
 </script>
 
 <style lang="scss">
-@use "sass:color";
+// 导入设计令牌和混合函数
+@use "./tokens/colors.scss" as *;
+@use "./tokens/size.scss" as *;
+@use "./tokens/css-vars.scss" as *;
+@use "./mixins/button.scss" as *;
 
-$h: 32px;
-$border-color: #d9d9d9;
-$color: #333;
-$blue: #40a9ff;
-$radius: 4px;
-$red: red;
-$grey: grey;
-
+// 按钮基础样式
 .ciallo-button {
-  box-sizing: border-box;
-  height: $h;
-  padding: 0 12px;
-  cursor: pointer;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  white-space: nowrap;
-  background: white;
-  color: $color;
-  border: 1px solid $border-color;
-  border-radius: $radius;
-  box-shadow: 0 1px 0 color.adjust(black, $alpha: -0.95);
-  transition: background 250ms;
+  // 应用基础按钮样式混合
+  @include button-base;
+  @include button-disabled;
 
+  // 先设置尺寸和基础样式，再设置颜色变体（避免mixed-decls警告）
+  @include button-size($height-base, $spacing-md, $font-size-base);
+  @include button-variant(theme-var(background-color),
+    theme-var(border-color-base),
+    theme-var(text-color-primary));
+
+  // 使用 & {} 包装直接声明以符合新 Sass 规范
+  & {
+    box-shadow: theme-var(box-shadow-sm);
+  }
+
+  // 相邻按钮间距（避免CSS选择器污染）
   &+& {
-    margin-left: 8px;
+    margin-left: $spacing-sm;
   }
 
-  &:hover,
-  &:focus {
-    color: $blue;
-    border-color: $blue;
-  }
+  // === 主题变体 ===
 
-  &:focus {
-    outline: none;
-  }
-
-  &::-moz-focus-inner {
-    border: 0;
-  }
-
+  // 链接主题：无背景和边框，使用主色
   &.ciallo-theme-link {
-    border-color: transparent;
-    box-shadow: none;
-    color: $blue;
+    @include button-variant(transparent,
+      transparent,
+      theme-var(primary-color));
+
+    & {
+      box-shadow: none;
+    }
 
     &:hover,
     &:focus {
-      color: color.scale($blue, $lightness: 10%);
+      text-decoration: underline;
     }
   }
 
+  // 文本主题：无背景和边框，继承文本颜色
   &.ciallo-theme-text {
-    border-color: transparent;
-    box-shadow: none;
-    color: inherit;
+    @include button-variant(transparent,
+      transparent,
+      inherit);
+
+    & {
+      box-shadow: none;
+    }
 
     &:hover,
     &:focus {
-      background: color.adjust(white, $lightness: -5%);
+      background: theme-var(background-color-light);
     }
   }
 
-  &.ciallo-size-big {
-    font-size: 24px;
-    height: 48px;
-    padding: 0 16px;
-  }
+  // === 尺寸变体 ===
 
+  // 小尺寸按钮
   &.ciallo-size-small {
-    font-size: 12px;
-    height: 20px;
-    padding: 0 4px;
+    @include button-size($height-sm, $spacing-xs, $font-size-sm);
   }
+
+  // 大尺寸按钮
+  &.ciallo-size-big {
+    @include button-size($height-xl, $spacing-lg, $font-size-xxl);
+  }
+
+  // === 级别变体（仅适用于button主题）===
 
   &.ciallo-theme-button {
+
+    // 主要级别：使用主色背景
     &.ciallo-level-main {
-      background: $blue;
-      color: white;
-      border-color: $blue;
-
-      &:hover,
-      &:focus {
-        background: color.adjust($blue, $lightness: -10%);
-        border-color: color.adjust($blue, $lightness: -10%);
-      }
+      @include button-variant(theme-var(primary-color),
+        theme-var(primary-color),
+        white);
     }
 
+    // 危险级别：使用错误色背景
     &.ciallo-level-danger {
-      background: $red;
-      border-color: $red;
-      color: white;
-
-      &:hover,
-      &:focus {
-        background: color.adjust($red, $lightness: -10%);
-        border-color: color.adjust($red, $lightness: -10%);
-      }
+      @include button-variant(theme-var(error-color),
+        theme-var(error-color),
+        white);
     }
   }
 
-  &.ciallo-theme-link {
-    &.ciallo-level-danger {
-      color: $red;
-
-      &:hover,
-      &:focus {
-        color: color.adjust($red, $lightness: -10%);
-      }
-    }
-  }
-
-  &.ciallo-theme-text {
-    &.ciallo-level-main {
-      color: $blue;
-
-      &:hover,
-      &:focus {
-        color: color.adjust($blue, $lightness: 10%);
-      }
-    }
-
-    &.ciallo-level-danger {
-      color: $red;
-
-      &:hover,
-      &:focus {
-        color: color.adjust($red, $lightness: 10%);
-      }
-    }
-  }
-
-  &.ciallo-theme-button {
-    &[disabled] {
-      cursor: not-allowed;
-      color: $grey;
-
-      &:hover {
-        border-color: $grey;
-      }
-    }
-  }
+  // === 链接和文本主题的级别变体 ===
 
   &.ciallo-theme-link,
   &.ciallo-theme-text {
-    &[disabled] {
-      cursor: not-allowed;
-      color: $grey;
+
+    // 主要级别：使用主色文本
+    &.ciallo-level-main {
+      color: theme-var(primary-color);
+    }
+
+    // 危险级别：使用错误色文本
+    &.ciallo-level-danger {
+      color: theme-var(error-color);
     }
   }
 
-  >.ciallo-loadingIndicator {
+  // === 加载状态 ===
+
+  // 加载状态下的样式调整
+  &.ciallo-button-loading {
+    position: relative;
+    pointer-events: none; // 阻止交互
+
+    // 内容透明度降低
+    > :not(.ciallo-loading-indicator) {
+      opacity: 0.6;
+    }
+  }
+
+  // 加载指示器动画
+  .ciallo-loading-indicator {
     width: 14px;
     height: 14px;
     display: inline-block;
-    margin-right: 4px;
-    border-radius: 8px;
-    border-color: $blue $blue $blue transparent;
-    border-style: solid;
-    border-width: 2px;
+    margin-right: $spacing-xs;
+    border-radius: 50%;
+    border: 2px solid theme-var(primary-color);
+    border-top-color: transparent;
     animation: ciallo-spin 1s infinite linear;
+    flex-shrink: 0; // 防止压缩
   }
 }
 
+// 旋转动画关键帧
 @keyframes ciallo-spin {
-  0% {
-    transform: rotate(0deg);
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// === 响应式设计 ===
+
+// 小屏幕适配
+@media (max-width: 768px) {
+  .ciallo-button {
+
+    // 在小屏幕上适当调整间距
+    &+& {
+      margin-left: $spacing-xs;
+    }
+
+    // 大按钮在小屏幕上稍微缩小
+    &.ciallo-size-big {
+      @include button-size($height-lg, $spacing-md, $font-size-xl);
+    }
+  }
+}
+
+// === 焦点和无障碍访问 ===
+
+.ciallo-button {
+
+  // 高对比度模式支持
+  @media (prefers-contrast: high) {
+    border-width: 2px;
   }
 
-  100% {
-    transform: rotate(360deg);
+  // 减少动画偏好支持
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    .ciallo-loading-indicator {
+      animation: none;
+    }
   }
 }
 </style>

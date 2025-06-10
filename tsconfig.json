@@ -4,6 +4,8 @@
       "module": "esnext",
       "strict": false,
       "jsx": "preserve",
-      "moduleResolution": "node"
+      "moduleResolution": "node",
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true
     }
 }

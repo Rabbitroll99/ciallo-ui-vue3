@@ -1,0 +1,41 @@
+@use "../tokens/colors.scss" as *;
+@use "../tokens/size.scss" as *;
+
+@mixin tabs-nav {
+  display: flex;
+  color: $text-color-primary;
+  border-bottom: 1px solid $border-color-base;
+  position: relative;
+}
+
+@mixin tabs-nav-item {
+  padding: $spacing-sm 0;
+  margin: 0 $spacing-lg;
+  cursor: pointer;
+  transition: color 0.25s;
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &.selected {
+    color: $primary-color;
+  }
+
+  &:hover:not(.selected) {
+    color: $primary-color-hover;
+  }
+}
+
+@mixin tabs-indicator {
+  position: absolute;
+  height: 3px;
+  background: $primary-color;
+  left: 0;
+  bottom: -1px;
+  transition: all 0.25s;
+}
+
+@mixin tabs-content {
+  padding: $spacing-sm 0;
+} 

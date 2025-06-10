@@ -1,0 +1,30 @@
+@use "./colors.scss" as *;
+
+@function theme-var($name) {
+  @return var(--ciallo-#{$name});
+}
+
+@mixin component-theme-vars {
+  --ciallo-primary-color: #{$primary-color};
+  --ciallo-primary-color-hover: #{$primary-color-hover};
+  --ciallo-primary-color-active: #{$primary-color-active};
+  
+  --ciallo-success-color: #{$success-color};
+  --ciallo-warning-color: #{$warning-color};
+  --ciallo-error-color: #{$error-color};
+  --ciallo-info-color: #{$info-color};
+  
+  --ciallo-text-color-primary: #{$text-color-primary};
+  --ciallo-text-color-secondary: #{$text-color-secondary};
+  --ciallo-text-color-disabled: #{$text-color-disabled};
+  
+  --ciallo-background-color: white;
+  --ciallo-background-color-light: #{$background-color-light};
+  --ciallo-background-color-base: #{$background-color-base};
+  
+  --ciallo-border-color-base: #{$border-color-base};
+  --ciallo-border-color-light: #{$border-color-light};
+  
+  --ciallo-box-shadow-base: #{$box-shadow-base};
+  --ciallo-box-shadow-sm: #{$box-shadow-sm};
+} 
