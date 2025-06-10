@@ -24,6 +24,7 @@ const toggle = () => {
 
 <style lang="scss">
 @use "sass:math";
+
 $h: 22px;
 $h2: $h - 4px;
 

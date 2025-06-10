@@ -43,6 +43,7 @@ const classes = computed(() => {
 
 <style lang="scss">
 @use "sass:color";
+
 $h: 32px;
 $border-color: #d9d9d9;
 $color: #333;

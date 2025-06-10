@@ -67,6 +67,7 @@ const onClickCancel = () => {
 
 <style lang="scss">
 @use "sass:color";
+
 $radius: 4px;
 $border-color: #d9d9d9;
 $background-color: white;
