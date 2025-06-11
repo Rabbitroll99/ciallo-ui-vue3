@@ -310,6 +310,9 @@ onUnmounted(() => {
     @include dialog-footer;
     border-top: 1px solid theme-var(border-color-light);
     background: theme-var(background-color-light);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 
     // 按钮间距优化
     .ciallo-button+.ciallo-button {
@@ -401,13 +404,68 @@ onUnmounted(() => {
     }
 
     &-footer {
-      // 小屏幕下按钮堆叠
-      flex-direction: column-reverse;
-      gap: $spacing-sm;
+      // 小屏幕下按钮堆叠，确定按钮在上方
+      flex-direction: column !important;
+      justify-content: stretch !important;
+      align-items: stretch !important;
+      gap: $spacing-md;
+      padding: $spacing-lg $spacing-xl $spacing-xl;
 
       .ciallo-button {
         width: 100%;
-        margin: 0;
+        margin: 0 !important;
+        // 增加移动端按钮高度，提升可点击性
+        min-height: 44px;
+        font-size: $font-size-base;
+        font-weight: 500;
+        border-radius: 8px;
+
+        // 主按钮（确定）在上方，样式更突出
+        &.ciallo-level-main {
+          order: 1;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          margin-bottom: $spacing-xs;
+        }
+
+        // 次要按钮（取消）在下方
+        &:not(.ciallo-level-main) {
+          order: 2;
+        }
+      }
+    }
+  }
+}
+
+// 更小屏幕（手机竖屏）的进一步优化
+@media (max-width: 480px) {
+  .ciallo-dialog {
+    // 极小屏幕下几乎占满整个屏幕
+    max-width: calc(100vw - #{$spacing-md * 2});
+    margin: $spacing-md;
+
+    &-header {
+      padding: $spacing-md $spacing-lg;
+    }
+
+    &-main {
+      padding: $spacing-lg;
+      max-height: 40vh;
+    }
+
+    &-footer {
+      padding: $spacing-md $spacing-lg $spacing-lg;
+      gap: $spacing-sm;
+
+      .ciallo-button {
+        // 进一步增加按钮高度
+        min-height: 48px;
+        font-size: $font-size-lg;
+        font-weight: 600;
+
+        // 在极小屏幕上也保持确定按钮的突出效果
+        &.ciallo-level-main {
+          margin-bottom: $spacing-xs;
+        }
       }
     }
   }
@@ -453,6 +511,38 @@ onUnmounted(() => {
 
     &-close {
       border: 1px solid;
+    }
+  }
+}
+
+// === 触摸设备优化 ===
+
+@media (hover: none) and (pointer: coarse) {
+  .ciallo-dialog {
+    &-footer {
+      .ciallo-button {
+
+        // 触摸设备上移除悬停效果，增加点击反馈
+        &:hover {
+          transform: none;
+        }
+
+        &:active {
+          transform: scale(0.98);
+          transition: transform 0.1s ease;
+        }
+      }
+    }
+
+    &-close {
+      // 触摸设备上增大关闭按钮的点击区域
+      width: 40px;
+      height: 40px;
+
+      &:active {
+        background: theme-var(background-color-base);
+        transform: scale(0.95);
+      }
     }
   }
 }

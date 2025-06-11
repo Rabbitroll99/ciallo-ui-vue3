@@ -259,13 +259,12 @@
       opacity: 0.6;
     }
     
-    // 加载指示器绝对定位（可选实现）
+    // 加载指示器绝对定位
     .ciallo-loading-indicator {
-      // 可以选择绝对定位到按钮中央
-      // position: absolute;
-      // left: 50%;
-      // top: 50%;
-      // transform: translate(-50%, -50%);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
     }
   }
 }
