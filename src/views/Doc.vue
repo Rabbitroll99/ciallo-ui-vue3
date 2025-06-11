@@ -181,25 +181,181 @@ aside {
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
   transition: transform $transition-duration ease-in-out, background-color $transition-duration ease-in-out;
 
-  /* 侧边栏标题样式 */
+  /* 侧边栏标题样式 - 卡片风格 */
   >h2 {
-    margin-bottom: 4px;
-    padding: 0 16px;
+    margin: 0 12px 12px 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #005c57;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fdfd 100%);
+    border-radius: 8px;
+    box-shadow:
+      0 2px 8px rgba(0, 121, 116, 0.15),
+      0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    position: relative;
+    text-align: center;
+    letter-spacing: 0.5px;
+    transition: all $transition-duration ease-in-out;
+
+    &:not(:first-child) {
+      margin-top: 20px;
+    }
+
+    /* 卡片的微妙装饰线 */
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 3px;
+      background: linear-gradient(90deg, #02bcb0, #007974);
+      border-radius: 0 0 3px 3px;
+      transition: all $transition-duration ease-in-out;
+    }
   }
 
-  /* 导航列表样式 */
+  /* 侧边栏隐藏时重置所有变换 */
+  &:not(.aside-visible) {
+
+    >h2,
+    >ol>li>a,
+    >ol>li .router-link-active {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    >ol>li .router-link-active::before,
+    >ol>li .router-link-active::after {
+      opacity: 0 !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  }
+
+  /* 侧边栏可见时才启用标题悬停效果 */
+  &.aside-visible {
+    >h2:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 4px 12px rgba(0, 121, 116, 0.2),
+        0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  /* 导航列表样式 - 卡片风格 */
   >ol {
+    padding: 0 12px;
+
     >li {
+      margin-bottom: 6px;
+
       >a {
         display: block;
-        padding: 4px 16px;
+        padding: 10px 16px;
+        margin: 0;
         text-decoration: none;
-        transition: background-color 0.3s ease-in-out;
+        color: #4a5568;
+        font-size: 13px;
+        font-weight: 500;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 1px 3px rgba(0, 121, 116, 0.08);
+        transition: all $transition-duration ease-in-out;
+        position: relative;
+
+        /* 左侧装饰点 */
+        &::before {
+          content: '';
+          position: absolute;
+          left: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 4px;
+          height: 4px;
+          background: #02bcb0;
+          border-radius: 50%;
+          opacity: 0.6;
+          transition: all $transition-duration ease-in-out;
+        }
+
+        /* 右侧指示器基础样式 */
+        &::after {
+          transition: all $transition-duration ease-in-out;
+        }
       }
 
       /* 当前活跃链接样式 */
       .router-link-active {
-        background: rgba(255, 255, 255, 0.8);
+        color: #005c57;
+        background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.95) 0%,
+            rgba(248, 253, 253, 0.9) 100%);
+        box-shadow:
+          0 3px 8px rgba(0, 121, 116, 0.2),
+          0 1px 3px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(2, 188, 176, 0.3);
+        font-weight: 600;
+        transform: translateX(3px);
+
+        &::before {
+          opacity: 1;
+          background: #007974;
+          transform: translateY(-50%) scale(1.4);
+          box-shadow: 0 0 6px rgba(0, 121, 116, 0.5);
+        }
+
+        /* 右侧活跃指示器 */
+        &::after {
+          content: '';
+          position: absolute;
+          right: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 0;
+          height: 0;
+          border-left: 4px solid #007974;
+          border-top: 3px solid transparent;
+          border-bottom: 3px solid transparent;
+          transition: all $transition-duration ease-in-out;
+        }
+
+      }
+    }
+  }
+
+  /* 侧边栏可见时才启用链接悬停效果 */
+  &.aside-visible {
+    >ol {
+      >li {
+        >a:hover {
+          color: #005c57;
+          background: rgba(255, 255, 255, 0.85);
+          transform: translateX(2px);
+          box-shadow:
+            0 2px 6px rgba(0, 121, 116, 0.15),
+            0 1px 3px rgba(0, 0, 0, 0.1);
+          border-color: rgba(255, 255, 255, 0.7);
+
+          &::before {
+            opacity: 1;
+            transform: translateY(-50%) scale(1.2);
+            box-shadow: 0 0 4px rgba(2, 188, 176, 0.4);
+          }
+        }
+
+        .router-link-active:hover {
+          transform: translateX(3px);
+          box-shadow:
+            0 4px 10px rgba(0, 121, 116, 0.25),
+            0 2px 6px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
       }
     }
   }
