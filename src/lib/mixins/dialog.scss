@@ -10,6 +10,10 @@
   z-index: 1000;
 }
 
+@mixin dialog-overlay {
+  @include overlay-base;
+}
+
 @mixin dialog-wrapper {
   position: fixed;
   left: 50%;

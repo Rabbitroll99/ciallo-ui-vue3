@@ -58,22 +58,50 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
-import type { CarouselProps, CarouselEmits } from "../../types/carousel";
+import type { CarouselImage, CarouselNavigationMode, CarouselType } from "../../types/carousel";
 
 // 组件属性定义，提供合理的默认值
-const props = withDefaults(defineProps<CarouselProps>(), {
-    autoplay: false,          // 默认不自动播放（常规模式）
-    interval: 3000,           // 自动播放间隔（毫秒）
-    showIndicators: true,     // 是否显示指示器
-    showNavigation: true,     // 是否显示左右切换按钮
-    navigationMode: 'hover',  // 导航按钮显示模式：hover（悬停显示）| always（始终显示）
-    type: 'default',          // 走马灯类型：default（默认模式）| card（卡片模式）
-    cardWidth: '300px',       // 卡片宽度（仅在卡片模式下生效）
-    cardScale: 0.8,           // 非激活卡片的缩放比例（仅在卡片模式下生效）
-})
+const props = defineProps({
+    images: {
+        type: Array as () => CarouselImage[],
+        required: true
+    },
+    autoplay: {
+        type: Boolean,
+        default: false
+    },
+    interval: {
+        type: Number,
+        default: 3000
+    },
+    showIndicators: {
+        type: Boolean,
+        default: true
+    },
+    showNavigation: {
+        type: Boolean,
+        default: true
+    },
+    navigationMode: {
+        type: String as () => CarouselNavigationMode,
+        default: 'hover'
+    },
+    type: {
+        type: String as () => CarouselType,
+        default: 'default'
+    },
+    cardWidth: {
+        type: String,
+        default: '300px'
+    },
+    cardScale: {
+        type: Number,
+        default: 0.8
+    }
+});
 
 // 事件发射器
-const emit = defineEmits<CarouselEmits>();
+const emit = defineEmits(['change', 'update:current']);
 
 // ===== 响应式数据 =====
 
@@ -170,6 +198,22 @@ const getCardClasses = (index: number): Record<string, boolean> => {
 };
 
 /**
+ * 判断卡片是否可见
+ * @param index 卡片索引
+ */
+const isCardVisible = (index: number): boolean => {
+    if (props.type !== 'card') return false;
+
+    const diff = index - currentIndex.value;
+    const total = props.images.length;
+
+    // 处理循环位置
+    const normalizedDiff = diff > total / 2 ? diff - total : diff < -total / 2 ? diff + total : diff;
+
+    return Math.abs(normalizedDiff) <= 1;
+};
+
+/**
  * 获取卡片的内联样式
  * @param index 卡片索引
  */
@@ -248,476 +292,419 @@ const getCardStyle = (index: number): Record<string, string> => {
     } else if (orientation === 'portrait') {
         // 竖板图片：智能尺寸调整，避免连续竖版图片中出现大小不一
         const hasAdjacentLandscape = prevOrientation === 'landscape' || nextOrientation === 'landscape';
-
         const prevPortraitEnlarged = prevOrientation === 'portrait' && checkEnlargedAdjacent(prevImageIndex);
         const nextPortraitEnlarged = nextOrientation === 'portrait' && checkEnlargedAdjacent(nextImageIndex);
+        const shouldEnlarge = hasAdjacentLandscape || prevPortraitEnlarged || nextPortraitEnlarged;
 
-        // 决策逻辑：如果自己与横板相邻，或者相邻的竖版图片被放大了，都使用放大尺寸
-        if (hasAdjacentLandscape || prevPortraitEnlarged || nextPortraitEnlarged) {
-            // 使用放大尺寸保持视觉连续性
-            const adjustedWidth = cardWidthNum * 1.3;
-            dynamicWidth = `${adjustedWidth}px`;
-            dynamicHeight = '85%';
-        } else {
-            // 全部是小图片时保持默认尺寸
-            dynamicHeight = '80%';
+        if (shouldEnlarge && actualAspectRatio) {
+            // 如果相邻图片中有横板，适当放大竖版图片
+            const scaleFactor = 1.3; // 增大尺寸但小于横板
+            dynamicWidth = `${cardWidthNum * scaleFactor}px`;
+            // 保持宽高比
+            const calculatedHeight = (cardWidthNum * scaleFactor) / actualAspectRatio;
+            dynamicHeight = `${calculatedHeight}px`;
+        } else if (actualAspectRatio) {
+            // 标准尺寸，但保持宽高比
             dynamicWidth = props.cardWidth;
+            const calculatedHeight = parseInt(props.cardWidth) / actualAspectRatio;
+            dynamicHeight = `${calculatedHeight}px`;
         }
     } else if (orientation === 'square') {
-        // 正方形图片：智能调整，保持与相邻图片的视觉连续性
+        // 正方形图片：智能尺寸调整
         const hasAdjacentLandscape = prevOrientation === 'landscape' || nextOrientation === 'landscape';
-
-        // 检查相邻的正方形图片是否被放大
         const prevSquareEnlarged = prevOrientation === 'square' && checkEnlargedAdjacent(prevImageIndex);
         const nextSquareEnlarged = nextOrientation === 'square' && checkEnlargedAdjacent(nextImageIndex);
+        const shouldEnlarge = hasAdjacentLandscape || prevSquareEnlarged || nextSquareEnlarged;
 
-        // 检查相邻的竖版图片是否被放大
-        const prevPortraitEnlarged = prevOrientation === 'portrait' && checkEnlargedAdjacent(prevImageIndex);
-        const nextPortraitEnlarged = nextOrientation === 'portrait' && checkEnlargedAdjacent(nextImageIndex);
-
-        // 如果相邻有被放大的图片，也进行相应调整
-        if (hasAdjacentLandscape || prevSquareEnlarged || nextSquareEnlarged ||
-            prevPortraitEnlarged || nextPortraitEnlarged) {
-            // 与放大图片相邻时增大尺寸
-            const adjustedSize = cardWidthNum * 1.2;
-            dynamicHeight = `${adjustedSize}px`;
-            dynamicWidth = `${adjustedSize}px`;
+        if (shouldEnlarge) {
+            // 如果相邻图片中有横板，适当放大正方形图片
+            const scaleFactor = 1.2;
+            dynamicWidth = `${cardWidthNum * scaleFactor}px`;
+            dynamicHeight = `${cardWidthNum * scaleFactor}px`;
         } else {
-            // 保持默认正方形比例
-            dynamicHeight = props.cardWidth;
+            // 标准尺寸
             dynamicWidth = props.cardWidth;
+            dynamicHeight = props.cardWidth;
         }
     }
 
     return {
-        transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale})`,
-        zIndex: zIndex.toString(),
+        transform: `translateX(${translateX}px) scale(${scale})`,
         width: dynamicWidth,
-        height: dynamicHeight
+        height: dynamicHeight,
+        zIndex: String(zIndex)
     };
 };
 
 /**
- * 判断卡片是否可见
+ * 处理卡片点击事件
  * @param index 卡片索引
  */
-const isCardVisible = (index: number): boolean => {
-    if (props.type !== 'card') return index === currentIndex.value;
-
-    const diff = index - currentIndex.value;
-    const total = props.images.length;
-    const normalizedDiff = diff > total / 2 ? diff - total : diff < -total / 2 ? diff + total : diff;
-
-    return Math.abs(normalizedDiff) <= 1;
-};
-
-/**
- * 处理卡片点击事件
- * @param index 点击的卡片索引
- */
 const handleCardClick = (index: number): void => {
-    if (props.type === 'card' && index !== currentIndex.value) {
+    // 仅当点击的不是当前激活的卡片时才切换
+    if (index !== currentIndex.value) {
         goToSlide(index);
     }
 };
 
-// ===== 核心方法 =====
+// ===== 滑动控制方法 =====
 
 /**
- * 切换到指定幻灯片
- * @param index 目标幻灯片索引
- */
-const goToSlide = (index: number): void => {
-    if (index >= 0 && index < props.images.length && index !== currentIndex.value) {
-        currentIndex.value = index
-        emit("change", index)
-        emit("update:current", index)
-    }
-}
-
-/**
- * 切换到下一张
- */
-const nextSlide = (): void => {
-    const nextIndex = (currentIndex.value + 1) % props.images.length
-    goToSlide(nextIndex)
-}
-
-/**
- * 切换到上一张  
+ * 切换到上一张图片
  */
 const prevSlide = (): void => {
-    const prevIndex = currentIndex.value === 0
-        ? props.images.length - 1
-        : currentIndex.value - 1
-    goToSlide(prevIndex)
-}
+    const totalImages = props.images.length;
+    if (totalImages <= 1) return;
 
-// ===== 鼠标事件处理 =====
-
-/**
- * 处理鼠标进入事件
- */
-const handleMouseEnter = (): void => {
-    // 如果是自动播放模式，暂停播放
-    if (props.autoplay) {
-        pauseAutoplay()
-    }
-
-    // 如果导航模式是hover，显示导航按钮
-    if (props.navigationMode === 'hover') {
-        navVisible.value = true
-    }
-}
+    currentIndex.value = (currentIndex.value - 1 + totalImages) % totalImages;
+    emitChangeEvent();
+};
 
 /**
- * 处理鼠标离开事件
+ * 切换到下一张图片
  */
-const handleMouseLeave = (): void => {
-    // 如果是自动播放模式，恢复播放
-    if (props.autoplay) {
-        resumeAutoplay()
-    }
+const nextSlide = (): void => {
+    const totalImages = props.images.length;
+    if (totalImages <= 1) return;
 
-    // 如果导航模式是hover，隐藏导航按钮
-    if (props.navigationMode === 'hover') {
-        navVisible.value = false
-    }
-}
+    currentIndex.value = (currentIndex.value + 1) % totalImages;
+    emitChangeEvent();
+};
+
+/**
+ * 切换到指定索引的图片
+ * @param index 目标索引
+ */
+const goToSlide = (index: number): void => {
+    if (index === currentIndex.value || index < 0 || index >= props.images.length) return;
+
+    currentIndex.value = index;
+    emitChangeEvent();
+};
+
+/**
+ * 发送切换事件
+ */
+const emitChangeEvent = (): void => {
+    emit('change', currentIndex.value);
+    emit('update:current', currentIndex.value);
+};
 
 // ===== 自动播放控制 =====
 
 /**
- * 启动自动播放
+ * 开始自动播放
  */
 const startAutoplay = (): void => {
-    if (props.autoplay && props.images.length > 1) {
-        timer.value = setInterval(nextSlide, props.interval)
-    }
-}
+    if (!props.autoplay) return;
+
+    // 清除现有计时器
+    stopAutoplay();
+
+    // 设置新计时器
+    timer.value = setTimeout(() => {
+        nextSlide();
+        startAutoplay(); // 递归调用，保持自动播放
+    }, props.interval);
+};
 
 /**
- * 暂停自动播放
+ * 停止自动播放
  */
-const pauseAutoplay = (): void => {
+const stopAutoplay = (): void => {
     if (timer.value) {
-        clearInterval(timer.value)
-        timer.value = null
+        clearTimeout(timer.value);
+        timer.value = null;
     }
-}
+};
+
+// ===== 鼠标事件处理 =====
 
 /**
- * 恢复自动播放
+ * 鼠标进入轮播图
  */
-const resumeAutoplay = (): void => {
+const handleMouseEnter = (): void => {
+    // 自动播放模式下，鼠标进入暂停播放
     if (props.autoplay) {
-        startAutoplay()
+        stopAutoplay();
     }
-}
 
-// ===== 触摸滑动处理 =====
+    // 显示导航按钮（对应hover模式）
+    if (props.navigationMode === 'hover') {
+        navVisible.value = true;
+    }
+};
 
 /**
- * 处理触摸开始事件
+ * 鼠标离开轮播图
+ */
+const handleMouseLeave = (): void => {
+    // 自动播放模式下，鼠标离开继续播放
+    if (props.autoplay) {
+        startAutoplay();
+    }
+
+    // 隐藏导航按钮（对应hover模式）
+    if (props.navigationMode === 'hover') {
+        navVisible.value = false;
+    }
+};
+
+// ===== 触摸事件处理 =====
+
+/**
+ * 触摸开始事件
  * @param event 触摸事件
  */
 const handleTouchStart = (event: TouchEvent): void => {
-    const touch = event.touches[0]
-    touchStartX.value = touch.clientX
-    touchStartY.value = touch.clientY
-    isSwiping.value = false
+    // 自动播放模式下，触摸开始暂停播放
+    if (props.autoplay) {
+        stopAutoplay();
+    }
 
-    // 暂停自动播放
-    pauseAutoplay()
-}
+    const touch = event.touches[0];
+    touchStartX.value = touch.clientX;
+    touchStartY.value = touch.clientY;
+    isSwiping.value = true;
+};
 
 /**
- * 处理触摸移动事件
+ * 触摸移动事件
  * @param event 触摸事件
  */
 const handleTouchMove = (event: TouchEvent): void => {
-    if (!isSwiping.value) {
-        const touch = event.touches[0]
-        const deltaX = Math.abs(touch.clientX - touchStartX.value)
-        const deltaY = Math.abs(touch.clientY - touchStartY.value)
+    if (!isSwiping.value) return;
 
-        // 判断是否为水平滑动
-        if (deltaX > deltaY && deltaX > 10) {
-            isSwiping.value = true
-            event.preventDefault() // 阻止页面滚动
-        }
-    } else {
-        event.preventDefault()
-    }
-}
+    const touch = event.touches[0];
+    touchEndX.value = touch.clientX;
+    touchEndY.value = touch.clientY;
+};
 
 /**
- * 处理触摸结束事件
- * @param event 触摸事件
+ * 触摸结束事件
  */
-const handleTouchEnd = (event: TouchEvent): void => {
-    if (isSwiping.value) {
-        const touch = event.changedTouches[0]
-        touchEndX.value = touch.clientX
-        touchEndY.value = touch.clientY
+const handleTouchEnd = (): void => {
+    if (!isSwiping.value) return;
 
-        const deltaX = touchEndX.value - touchStartX.value
-        const deltaY = Math.abs(touchEndY.value - touchStartY.value)
+    // 计算水平和垂直方向的滑动距离
+    const deltaX = touchEndX.value - touchStartX.value;
+    const deltaY = touchEndY.value - touchStartY.value;
 
-        // 确保是水平滑动且距离足够
-        if (Math.abs(deltaX) > minSwipeDistance && Math.abs(deltaX) > deltaY) {
-            if (deltaX > 0) {
-                // 向右滑动，切换到上一张
-                prevSlide()
-            } else {
-                // 向左滑动，切换到下一张
-                nextSlide()
-            }
+    // 如果水平滑动距离大于垂直滑动距离且大于最小滑动距离，则认为是有效的水平滑动
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+        if (deltaX > 0) {
+            // 向右滑动，切换到上一张
+            prevSlide();
+        } else {
+            // 向左滑动，切换到下一张
+            nextSlide();
         }
     }
 
-    // 重置状态
-    isSwiping.value = false
+    // 重置触摸状态
+    isSwiping.value = false;
 
-    // 恢复自动播放
-    resumeAutoplay()
-}
+    // 自动播放模式下，触摸结束后继续播放
+    if (props.autoplay) {
+        startAutoplay();
+    }
+};
 
-// ===== 生命周期 =====
+// ===== 生命周期钩子 =====
 
 onMounted(() => {
-    // 根据导航模式初始化按钮显示状态
-    if (props.navigationMode === 'always') {
-        navVisible.value = true
+    // 自动播放模式下，组件挂载后开始播放
+    if (props.autoplay) {
+        startAutoplay();
     }
 
-    // 启动自动播放
-    startAutoplay()
-})
+    // 总是显示模式下，导航按钮始终可见
+    if (props.navigationMode === 'always') {
+        navVisible.value = true;
+    }
+});
 
 onUnmounted(() => {
-    pauseAutoplay()
-})
+    // 组件卸载时，清理计时器
+    stopAutoplay();
+});
 </script>
 
 <style lang="scss">
-// 导入设计令牌和工具函数
+/* 导入设计令牌和混合函数 */
 @use "../../tokens/colors.scss" as *;
 @use "../../tokens/size.scss" as *;
 @use "../../tokens/css-vars.scss" as *;
 
-// === 轮播图基础样式 ===
+/* === 轮播图基础样式 === */
 .ciallo-carousel {
+    /* 基础布局 */
     position: relative;
     width: 100%;
-    height: 400px; // 固定一个合适的高度
+    height: 400px;
     overflow: hidden;
     border-radius: $border-radius-lg;
-    box-shadow: theme-var(box-shadow-base);
-    background: theme-var(background-color);
-
-    // 触摸优化
-    touch-action: pan-y;
     user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
+    touch-action: pan-y;
 
-    // 卡片模式特殊样式
-    &.ciallo-carousel-card {
-        overflow: visible; // 卡片模式需要显示溢出的卡片
-        background: transparent; // 卡片模式不需要背景
-        box-shadow: none; // 卡片模式不需要整体阴影
-        border-radius: 0; // 卡片模式不需要圆角
-
-        // 确保卡片模式下的容器有足够空间
-        .ciallo-carousel-container {
-            overflow: visible;
-        }
-
-        // 默认模式的样式在卡片模式下不适用
-        .ciallo-carousel-item:not(.ciallo-carousel-card-item) {
-            display: none;
-        }
-    }
-
-    // === 图片容器样式 ===
-    .ciallo-carousel-container {
+    /* 容器基础样式 */
+    &-container {
         position: relative;
         width: 100%;
         height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-
-        // 卡片模式容器
-        &.ciallo-carousel-container-card {
-            perspective: 1200px; // 3D 透视效果
-            perspective-origin: center center;
-        }
+        background: theme-var(background-color-dark);
     }
 
-    .ciallo-carousel-item {
+    /* === 轮播图项目样式 === */
+    &-item {
         position: absolute;
-        top: 0;
-        left: 0;
         width: 100%;
         height: 100%;
         opacity: 0;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg,
-                theme-var(background-color-light) 0%,
-                theme-var(background-color) 100%); // 添加渐变背景
-        transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
 
-        // 当前激活项
+        /* 活动项目 */
         &.ciallo-carousel-active {
             opacity: 1;
+            z-index: 1;
+            pointer-events: auto;
         }
 
+        /* 图片样式 */
         img {
-            // 智能尺寸策略：既要充分利用空间，又要保持比例
-            width: auto;
-            height: auto;
             max-width: 100%;
             max-height: 100%;
-
-            // 对于小图片，确保至少占据合理的显示空间
-            // 使用 clamp 函数实现更智能的尺寸控制
-            min-width: clamp(300px, 60%, 100%); // 最小300px，理想60%，最大100%
-            min-height: clamp(200px, 50%, 100%); // 最小200px，理想50%，最大100%
-
-            object-fit: contain; // 保持完整显示，不裁剪
-            object-position: center;
+            object-fit: contain;
             display: block;
-            pointer-events: none; // 防止拖拽
+            user-select: none;
+            border-radius: $border-radius-base;
         }
     }
 
-    // === 卡片模式样式 ===
-    .ciallo-carousel-card-item {
+    /* === 卡片模式样式 === */
+    &-container-card {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        perspective: 1200px;
+        overflow: visible;
+    }
+
+    &-card-item {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 300px; // 默认卡片宽度，会被内联样式覆盖
+        width: 300px;
         height: 80%;
-        opacity: 1; // 卡片模式下所有卡片都可见
-        transform-origin: center center;
-        transform: translate(-50%, -50%); // 默认居中，会被内联样式覆盖
-        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        cursor: pointer;
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: $border-radius-lg;
-        box-shadow: theme-var(box-shadow-base);
-        background: theme-var(background-color);
         overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        cursor: pointer;
+        backface-visibility: hidden;
+        will-change: transform;
+        transform-origin: center center;
+        pointer-events: none;
 
-        // 激活状态卡片
+        /* 活动卡片 */
         &.ciallo-carousel-card-active {
-            cursor: default;
-            box-shadow: theme-var(box-shadow-lg);
+            z-index: 10;
+            opacity: 1;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            pointer-events: auto;
         }
 
-        // 前一个卡片
+        /* 前一张卡片 */
         &.ciallo-carousel-card-prev {
+            z-index: 5;
             opacity: 0.7;
+            pointer-events: auto;
         }
 
-        // 下一个卡片
+        /* 后一张卡片 */
         &.ciallo-carousel-card-next {
+            z-index: 5;
             opacity: 0.7;
+            pointer-events: auto;
         }
 
-        // 隐藏的卡片
+        /* 隐藏卡片 */
         &.ciallo-carousel-card-hidden {
             opacity: 0;
+            z-index: 1;
             pointer-events: none;
         }
 
-        // 悬停效果（仅对非激活卡片）
-        &:not(.ciallo-carousel-card-active):hover {
-            opacity: 0.9;
-            box-shadow: theme-var(box-shadow-lg);
-        }
-
-        // 卡片模式下的图片样式 - 动态适应卡片尺寸，完整显示
+        /* 卡片图片样式 */
         img {
-            // 基础样式：完整显示图片内容
             width: 100%;
             height: 100%;
-            min-width: unset;
-            min-height: unset;
-            object-position: center;
-            display: block;
+            object-fit: cover;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: $border-radius-base;
 
-            // 默认使用contain模式：确保图片完整显示
-            object-fit: contain;
-
-            // 横板图片：卡片高度已动态调整，图片完整显示无白边
+            /* 基于图片方向的样式优化 */
             &.landscape {
-                width: 100%;
-                height: 100%;
-                object-fit: contain; // 完整显示，因为卡片高度已适应图片比例
-                object-position: center;
+                object-fit: cover;
             }
 
-            // 竖板图片：填满卡片，可能有上下轻微裁剪
             &.portrait {
-                width: 100%;
-                height: 100%;
-                object-fit: cover; // 填满卡片宽度
-                object-position: center;
+                object-fit: contain;
             }
 
-            // 正方形图片：完整填满正方形卡片
             &.square {
-                width: 100%;
-                height: 100%;
-                object-fit: contain; // 完整显示
-                object-position: center;
+                object-fit: cover;
             }
         }
     }
 
-    // === 导航按钮样式 ===
+    /* === 导航按钮样式 === */
     .ciallo-carousel-nav {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
         z-index: 20;
+        width: 48px;
+        height: 48px;
+        background: rgba(0, 0, 0, 0.4);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 44px;
-        height: 44px;
-        border: none;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.5);
-        color: white;
-        cursor: pointer;
         opacity: 0;
         visibility: hidden;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         backdrop-filter: blur(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
-        // 悬停状态
+        /* 悬停效果 */
         &:hover {
-            background: rgba(0, 0, 0, 0.7);
-            transform: translateY(-50%) scale(1.1);
+            background: rgba(0, 0, 0, 0.6);
+            transform: translateY(-50%) scale(1.05);
         }
 
-        // 焦点状态
+        /* 焦点效果 */
         &:focus {
             outline: none;
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        // 激活状态
+        /* 活动效果 */
         &:active {
             transform: translateY(-50%) scale(0.95);
         }
 
-        // 显示状态
+        /* 显示状态 */
         &.ciallo-carousel-nav-visible {
             opacity: 1;
             visibility: visible;
@@ -737,7 +724,7 @@ onUnmounted(() => {
         right: $spacing-md;
     }
 
-    // 卡片模式下的导航按钮位置调整
+    /* 卡片模式下的导航按钮位置调整 */
     &.ciallo-carousel-card {
         .ciallo-carousel-nav-prev {
             left: $spacing-xl;
@@ -748,7 +735,7 @@ onUnmounted(() => {
         }
     }
 
-    // === 指示器样式 ===
+    /* === 指示器样式 === */
     .ciallo-carousel-indicators {
         position: absolute;
         bottom: $spacing-md;
@@ -772,57 +759,61 @@ onUnmounted(() => {
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-        // 焦点状态
+        /* 焦点状态 */
         &:focus {
             outline: none;
             box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
         }
 
-        // 激活状态
+        /* 激活状态 */
         &.ciallo-carousel-indicator-active {
             background: rgba(255, 255, 255, 0.9);
             transform: scale(1.2);
         }
 
-        // 悬停状态
+        /* 悬停状态 */
         &:hover:not(.ciallo-carousel-indicator-active) {
             background: rgba(255, 255, 255, 0.7);
             transform: scale(1.1);
         }
     }
 
-    // === 组件模式样式 ===
+    /* === 组件模式样式 === */
 
-    // 始终显示导航按钮模式
+    /* 始终显示导航按钮模式 */
     &.ciallo-carousel-nav-always .ciallo-carousel-nav {
         opacity: 1;
         visibility: visible;
     }
 
-    // 悬停显示导航按钮模式的动画增强
+    /* 悬停显示导航按钮模式的动画增强 */
     &.ciallo-carousel-nav-hover:hover .ciallo-carousel-nav {
         opacity: 1;
         visibility: visible;
     }
 }
 
-// === 响应式设计 ===
+/* === 响应式设计 === */
 
-// 小屏幕适配
+/* 小屏幕适配 */
 @media (max-width: 768px) {
     .ciallo-carousel {
-        height: 250px; // 小屏幕固定高度
+        height: 250px;
+        /* 小屏幕固定高度 */
         border-radius: $border-radius-base;
 
-        // 小屏幕下调整图片最小尺寸
+        /* 小屏幕下调整图片最小尺寸 */
         .ciallo-carousel-item img {
-            min-width: clamp(200px, 70%, 100%); // 小屏幕下降低最小宽度要求
-            min-height: clamp(150px, 60%, 100%); // 小屏幕下降低最小高度要求
+            min-width: clamp(200px, 70%, 100%);
+            /* 小屏幕下降低最小宽度要求 */
+            min-height: clamp(150px, 60%, 100%);
+            /* 小屏幕下降低最小高度要求 */
         }
 
-        // 小屏幕下的卡片样式调整
+        /* 小屏幕下的卡片样式调整 */
         .ciallo-carousel-card-item {
-            width: 200px; // 小屏幕下的卡片宽度
+            width: 200px;
+            /* 小屏幕下的卡片宽度 */
             height: 70%;
         }
 
@@ -867,31 +858,35 @@ onUnmounted(() => {
     }
 }
 
-// 中等屏幕适配
+/* 中等屏幕适配 */
 @media (min-width: 769px) and (max-width: 1199px) {
     .ciallo-carousel {
-        height: 350px; // 中等屏幕高度
+        height: 350px;
+        /* 中等屏幕高度 */
 
         .ciallo-carousel-card-item {
-            width: 250px; // 中等屏幕下的卡片宽度
+            width: 250px;
+            /* 中等屏幕下的卡片宽度 */
         }
     }
 }
 
-// 大屏幕优化
+/* 大屏幕优化 */
 @media (min-width: 1200px) {
     .ciallo-carousel {
-        height: 450px; // 大屏幕高度
+        height: 450px;
+        /* 大屏幕高度 */
 
         .ciallo-carousel-card-item {
-            width: 350px; // 大屏幕下的卡片宽度
+            width: 350px;
+            /* 大屏幕下的卡片宽度 */
         }
     }
 }
 
-// === 无障碍访问优化 ===
+/* === 无障碍访问优化 === */
 
-// 高对比度模式支持
+/* 高对比度模式支持 */
 @media (prefers-contrast: high) {
     .ciallo-carousel-indicator {
         border: 1px solid rgba(255, 255, 255, 0.8);
@@ -903,7 +898,7 @@ onUnmounted(() => {
     }
 }
 
-// 减少动画偏好支持
+/* 减少动画偏好支持 */
 @media (prefers-reduced-motion: reduce) {
     .ciallo-carousel-item {
         transition: none;
@@ -919,6 +914,25 @@ onUnmounted(() => {
 
     .ciallo-carousel-nav {
         transition: none;
+    }
+}
+
+/* 强制颜色模式支持 */
+@media (forced-colors: active) {
+    .ciallo-carousel-indicator {
+        border: 1px solid ButtonText;
+        background: ButtonFace;
+
+        &.ciallo-carousel-indicator-active {
+            border: 2px solid Highlight;
+            background: Highlight;
+        }
+    }
+
+    .ciallo-carousel-nav {
+        border: 1px solid ButtonText;
+        background: ButtonFace;
+        color: ButtonText;
     }
 }
 </style>

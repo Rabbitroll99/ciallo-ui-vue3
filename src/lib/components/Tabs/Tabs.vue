@@ -47,17 +47,29 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect, onMounted, useSlots, nextTick } from "vue";
 import Tab from "./Tab.vue";
-import type { TabsProps, TabsEmits } from "../../types/tabs";
 
 // 组件属性定义
-const props = withDefaults(defineProps<TabsProps>(), {
-  type: 'line',           // 标签类型
-  position: 'top',        // 标签位置
-  closable: false,        // 是否可关闭
+const props = defineProps({
+  selected: {
+    type: String,
+    default: undefined
+  },
+  type: {
+    type: String as () => "line" | "card",
+    default: 'line'
+  },
+  position: {
+    type: String as () => "top" | "bottom" | "left" | "right",
+    default: 'top'
+  },
+  closable: {
+    type: Boolean,
+    default: false
+  }
 });
 
 // 事件发射器
-const emit = defineEmits<TabsEmits>();
+const emit = defineEmits(['update:selected', 'tab-click', 'tab-remove']);
 
 // ===== 响应式状态 =====
 const navRef = ref<HTMLDivElement>();
@@ -250,29 +262,30 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-// 导入设计令牌和混合函数
+/* 导入设计令牌和混合函数 */
 @use "../../tokens/colors.scss" as *;
 @use "../../tokens/size.scss" as *;
 @use "../../tokens/css-vars.scss" as *;
 
-// === 标签页基础样式 ===
+/* === 标签页基础样式 === */
 .ciallo-tabs {
   position: relative;
 
-  // === 导航栏样式 ===
+  /* === 导航栏样式 === */
   &-nav {
     display: flex;
     position: relative;
     color: theme-var(text-color-primary);
     border-bottom: 1px solid theme-var(border-color-base);
 
-    // 垂直布局时的导航栏样式
+    /* 垂直布局时的导航栏样式 */
     .ciallo-tabs-left &,
     .ciallo-tabs-right & {
       flex-direction: column;
       border-bottom: none;
       border-right: 1px solid theme-var(border-color-base);
-      width: 200px; // 垂直标签的固定宽度
+      width: 200px;
+      /* 垂直标签的固定宽度 */
     }
 
     .ciallo-tabs-right & {
@@ -286,7 +299,7 @@ onMounted(() => {
     }
   }
 
-  // === 标签按钮样式 ===
+  /* === 标签按钮样式 === */
   &-nav-item {
     position: relative;
     display: flex;
@@ -300,31 +313,31 @@ onMounted(() => {
     white-space: nowrap;
     user-select: none;
 
-    // 过渡动画
+    /* 过渡动画 */
     transition:
       color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
       background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
-    // 焦点样式
+    /* 焦点样式 */
     &:focus {
       outline: none;
       background: theme-var(background-color-light);
       box-shadow: inset 0 0 0 2px theme-var(primary-color);
     }
 
-    // 悬停状态
+    /* 悬停状态 */
     &:hover:not(&-selected) {
       color: theme-var(primary-color-hover);
       background: theme-var(background-color-light);
     }
 
-    // 选中状态
+    /* 选中状态 */
     &-selected {
       color: theme-var(primary-color);
       font-weight: 500;
     }
 
-    // 标签文本
+    /* 标签文本 */
     &-text {
       flex: 1;
       text-align: left;
@@ -334,7 +347,7 @@ onMounted(() => {
       }
     }
 
-    // 关闭按钮
+    /* 关闭按钮 */
     &-close {
       display: flex;
       align-items: center;
@@ -361,7 +374,7 @@ onMounted(() => {
       }
     }
 
-    // 垂直布局时的样式调整
+    /* 垂直布局时的样式调整 */
     .ciallo-tabs-left &,
     .ciallo-tabs-right & {
       justify-content: flex-start;
@@ -370,7 +383,7 @@ onMounted(() => {
     }
   }
 
-  // === 指示器样式 ===
+  /* === 指示器样式 === */
   &-nav-indicator {
     position: absolute;
     background: theme-var(primary-color);
@@ -378,23 +391,23 @@ onMounted(() => {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
 
-    // 默认水平位置（底部）
+    /* 默认水平位置（底部） */
     bottom: 0;
     left: 0;
     height: 3px;
 
-    // 顶部位置
+    /* 顶部位置 */
     .ciallo-tabs-top & {
       bottom: 0;
     }
 
-    // 底部位置  
+    /* 底部位置 */
     .ciallo-tabs-bottom & {
       top: 0;
       bottom: auto;
     }
 
-    // 左侧位置
+    /* 左侧位置 */
     .ciallo-tabs-left & {
       right: 0;
       bottom: auto;
@@ -402,7 +415,7 @@ onMounted(() => {
       height: auto;
     }
 
-    // 右侧位置
+    /* 右侧位置 */
     .ciallo-tabs-right & {
       left: 0;
       bottom: auto;
@@ -411,11 +424,11 @@ onMounted(() => {
     }
   }
 
-  // === 内容区域样式 ===
+  /* === 内容区域样式 === */
   &-content {
     padding: $spacing-lg 0;
 
-    // 垂直布局时的内容区域
+    /* 垂直布局时的内容区域 */
     .ciallo-tabs-left &,
     .ciallo-tabs-right & {
       flex: 1;
@@ -423,127 +436,144 @@ onMounted(() => {
     }
   }
 
-  // 标签面板
+  /* 标签面板 */
   &-panel {
-    outline: none; // 移除焦点轮廓，通过其他方式处理无障碍访问
+    outline: none;
+    /* 移除焦点轮廓，通过其他方式处理无障碍访问 */
   }
 
-  // === 卡片类型样式 ===
+  /* === 卡片类型样式 === */
   &.ciallo-tabs-card {
     .ciallo-tabs-nav {
       background: theme-var(background-color-light);
       border-radius: $border-radius-base $border-radius-base 0 0;
 
       &-item {
-        border: 1px solid theme-var(border-color-base);
-        border-bottom: none;
-        margin-right: -1px;
+        margin-right: 2px;
         border-radius: $border-radius-base $border-radius-base 0 0;
-        background: theme-var(background-color-base);
+        border: 1px solid transparent;
+        border-bottom: none;
 
-        &:first-child {
-          border-left: 1px solid theme-var(border-color-base);
-        }
-
+        /* 选中状态 */
         &-selected {
-          background: theme-var(background-color);
-          border-bottom: 1px solid theme-var(background-color);
-          z-index: 2;
+          background: white;
+          border-color: theme-var(border-color-base);
+          color: theme-var(primary-color);
+
+          /* 创建连接内容区域的视觉效果 */
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: white;
+          }
         }
       }
-    }
 
-    // 卡片类型不显示指示器
-    .ciallo-tabs-nav-indicator {
-      display: none;
-    }
-
-    .ciallo-tabs-content {
-      background: theme-var(background-color);
-      border: 1px solid theme-var(border-color-base);
-      border-top: none;
-      border-radius: 0 0 $border-radius-base $border-radius-base;
-      padding: $spacing-lg;
+      /* 卡片模式下隐藏指示器 */
+      &-indicator {
+        display: none;
+      }
     }
   }
 
-  // === 垂直布局样式 ===
-  &.ciallo-tabs-left,
+  /* === 布局样式 === */
+
+  /* 顶部布局（默认） */
+  &.ciallo-tabs-top {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 底部布局 */
+  &.ciallo-tabs-bottom {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  /* 左侧布局 */
+  &.ciallo-tabs-left {
+    display: flex;
+    flex-direction: row;
+  }
+
+  /* 右侧布局 */
   &.ciallo-tabs-right {
     display: flex;
-
-    .ciallo-tabs-content {
-      flex: 1;
-    }
+    flex-direction: row-reverse;
   }
 
-  &.ciallo-tabs-right {
-    flex-direction: row-reverse;
+  /* === 可关闭标签样式 === */
+  &.ciallo-tabs-closable {
+    .ciallo-tabs-nav-item {
+      padding-right: $spacing-sm;
+    }
   }
 }
 
-// === 响应式设计 ===
-
-// 小屏幕适配
+/* === 响应式设计 === */
 @media (max-width: 768px) {
   .ciallo-tabs {
-    &-nav {
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
 
-      &::-webkit-scrollbar {
-        display: none;
-      }
-
-      &-item {
-        flex-shrink: 0;
-        min-width: 80px;
-      }
-    }
-
-    // 强制使用顶部布局
+    /* 在小屏幕上自动切换为顶部布局 */
     &.ciallo-tabs-left,
     &.ciallo-tabs-right {
-      display: block;
+      flex-direction: column;
 
       .ciallo-tabs-nav {
         flex-direction: row;
-        width: auto;
         border-right: none;
-        border-left: none;
         border-bottom: 1px solid theme-var(border-color-base);
+        width: 100%;
       }
 
       .ciallo-tabs-content {
         padding: $spacing-lg 0;
       }
+
+      /* 调整指示器为水平模式 */
+      .ciallo-tabs-nav-indicator {
+        bottom: 0;
+        left: 0;
+        width: auto !important;
+        height: 3px !important;
+      }
     }
   }
 }
 
-// === 减少动画偏好支持 ===
+/* === 动画效果 === */
+.ciallo-tabs-panel-enter-active,
+.ciallo-tabs-panel-leave-active {
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.ciallo-tabs-panel-enter-from,
+.ciallo-tabs-panel-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* === 无障碍增强 === */
+.ciallo-tabs[aria-orientation="vertical"] {
+  .ciallo-tabs-nav-item {
+    text-align: left;
+  }
+}
+
+/* 减少动画偏好支持 */
 @media (prefers-reduced-motion: reduce) {
   .ciallo-tabs {
-
-    &-nav-item,
-    &-nav-indicator {
+    .ciallo-tabs-nav-indicator {
       transition: none;
     }
-  }
-}
 
-// === 高对比度模式支持 ===
-@media (prefers-contrast: high) {
-  .ciallo-tabs {
-    &-nav {
-      border-width: 2px;
-    }
-
-    &-nav-item {
-      &:focus {
-        box-shadow: inset 0 0 0 3px;
-      }
+    .ciallo-tabs-panel-enter-active,
+    .ciallo-tabs-panel-leave-active {
+      transition: none;
     }
   }
 }

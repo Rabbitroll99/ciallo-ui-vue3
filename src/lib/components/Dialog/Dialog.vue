@@ -56,23 +56,57 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, onMounted, onUnmounted, watch } from "vue";
 import Button from "../Button/Button.vue";
-import type { DialogProps, DialogEmits } from "../../types/dialog";
 
 // 组件属性定义
-const props = withDefaults(defineProps<DialogProps>(), {
-  visible: false,              // 是否显示对话框
-  closeOnClickOverlay: true,   // 点击遮罩层是否关闭
-  closeOnPressEscape: true,    // 按ESC键是否关闭
-  title: '',                   // 标题文本
-  content: '',                 // 内容文本
-  okText: '确定',              // 确定按钮文本
-  cancelText: '取消',          // 取消按钮文本
-  showFooter: true,            // 是否显示底部操作区
-  loading: false,              // 确定按钮加载状态
+const props = defineProps({
+  visible: {
+    type: Boolean,
+    default: false
+  },
+  closeOnClickOverlay: {
+    type: Boolean,
+    default: true
+  },
+  closeOnPressEscape: {
+    type: Boolean,
+    default: true
+  },
+  title: {
+    type: String,
+    default: ''
+  },
+  content: {
+    type: String,
+    default: ''
+  },
+  okText: {
+    type: String,
+    default: '确定'
+  },
+  cancelText: {
+    type: String,
+    default: '取消'
+  },
+  showFooter: {
+    type: Boolean,
+    default: true
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  },
+  ok: {
+    type: Function,
+    default: undefined
+  },
+  cancel: {
+    type: Function,
+    default: undefined
+  }
 });
 
 // 事件发射器
-const emit = defineEmits<DialogEmits>();
+const emit = defineEmits(['update:visible', 'close', 'ok', 'cancel', 'error']);
 
 // ===== 响应式状态 =====
 const dialogRef = ref<HTMLElement>();
@@ -247,65 +281,67 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss">
-// 导入设计令牌和混合函数
+/* 导入设计令牌和混合函数 */
 @use "../../tokens/colors.scss" as *;
 @use "../../tokens/size.scss" as *;
 @use "../../tokens/css-vars.scss" as *;
 @use "../../mixins/dialog.scss" as *;
 
-// 对话框样式定义
+/* === 遮罩层样式 === */
+.ciallo-dialog-overlay {
+  @include dialog-overlay;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  animation: ciallo-dialog-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === 对话框样式 === */
 .ciallo-dialog {
 
-  // 遮罩层样式
-  &-overlay {
-    @include overlay-base;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(2px); // 添加背景模糊效果
-    animation: ciallo-dialog-fade-in 0.2s ease-out;
-  }
-
-  // 对话框包装器样式
+  /* 对话框包装器样式 */
   &-wrapper {
     @include dialog-wrapper;
     animation: ciallo-dialog-zoom-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  // 主对话框容器样式
+  /* 主对话框容器样式 */
   & {
     @include dialog-content;
     background: theme-var(background-color);
     color: theme-var(text-color-primary);
 
-    // 确保在不同主题下的良好对比度
+    /* 确保在不同主题下的良好对比度 */
     box-shadow:
       0 4px 6px -1px rgba(0, 0, 0, 0.1),
       0 2px 4px -1px rgba(0, 0, 0, 0.06),
       0 0 0 1px theme-var(border-color-light);
   }
 
-  // 标题栏样式
+  /* 标题栏样式 */
   &-header {
     @include dialog-header;
     border-bottom: 1px solid theme-var(border-color-light);
     background: theme-var(background-color-light);
   }
 
-  // 标题文本样式
+  /* 标题文本样式 */
   &-title {
     font-weight: 500;
     color: theme-var(text-color-primary);
     flex: 1;
   }
 
-  // 内容区域样式
+  /* 内容区域样式 */
   &-main {
     @include dialog-main;
     color: theme-var(text-color-secondary);
-    max-height: 60vh; // 限制最大高度
-    overflow-y: auto; // 内容过多时滚动
+    max-height: 60vh;
+    /* 限制最大高度 */
+    overflow-y: auto;
+    /* 内容过多时滚动 */
   }
 
-  // 底部操作区样式
+  /* 底部操作区样式 */
   &-footer {
     @include dialog-footer;
     border-top: 1px solid theme-var(border-color-light);
@@ -314,13 +350,13 @@ onUnmounted(() => {
     justify-content: flex-end;
     align-items: center;
 
-    // 按钮间距优化
+    /* 按钮间距优化 */
     .ciallo-button+.ciallo-button {
       margin-left: $spacing-sm;
     }
   }
 
-  // 关闭按钮样式
+  /* 关闭按钮样式 */
   &-close {
     display: flex;
     align-items: center;
@@ -336,25 +372,25 @@ onUnmounted(() => {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
 
-    // 悬停状态
+    /* 悬停状态 */
     &:hover {
       background: theme-var(background-color-base);
       color: theme-var(text-color-secondary);
       transform: scale(1.1);
     }
 
-    // 激活状态
+    /* 激活状态 */
     &:active {
       transform: scale(0.95);
     }
 
-    // 焦点状态
+    /* 焦点状态 */
     &:focus {
       outline: none;
       box-shadow: 0 0 0 2px theme-var(primary-color);
     }
 
-    // SVG图标样式
+    /* SVG图标样式 */
     svg {
       width: 16px;
       height: 16px;
@@ -363,9 +399,9 @@ onUnmounted(() => {
   }
 }
 
-// === 动画定义 ===
+/* === 动画定义 === */
 
-// 遮罩层淡入动画
+/* 遮罩层淡入动画 */
 @keyframes ciallo-dialog-fade-in {
   from {
     opacity: 0;
@@ -376,7 +412,7 @@ onUnmounted(() => {
   }
 }
 
-// 对话框缩放进入动画
+/* 对话框缩放进入动画 */
 @keyframes ciallo-dialog-zoom-in {
   from {
     opacity: 0;
@@ -389,22 +425,22 @@ onUnmounted(() => {
   }
 }
 
-// === 响应式设计 ===
+/* === 响应式设计 === */
 
-// 小屏幕适配
+/* 小屏幕适配 */
 @media (max-width: 768px) {
   .ciallo-dialog {
-    // 小屏幕下占满宽度，保留边距
+    /* 小屏幕下占满宽度，保留边距 */
     max-width: calc(100vw - #{$spacing-lg * 2});
     margin: $spacing-lg;
 
     &-main {
-      // 小屏幕下限制内容高度
+      /* 小屏幕下限制内容高度 */
       max-height: 50vh;
     }
 
     &-footer {
-      // 小屏幕下按钮堆叠，确定按钮在上方
+      /* 小屏幕下按钮堆叠，确定按钮在上方 */
       flex-direction: column !important;
       justify-content: stretch !important;
       align-items: stretch !important;
@@ -414,20 +450,20 @@ onUnmounted(() => {
       .ciallo-button {
         width: 100%;
         margin: 0 !important;
-        // 增加移动端按钮高度，提升可点击性
+        /* 增加移动端按钮高度，提升可点击性 */
         min-height: 44px;
         font-size: $font-size-base;
         font-weight: 500;
         border-radius: 8px;
 
-        // 主按钮（确定）在上方，样式更突出
+        /* 主按钮（确定）在上方，样式更突出 */
         &.ciallo-level-main {
           order: 1;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
           margin-bottom: $spacing-xs;
         }
 
-        // 次要按钮（取消）在下方
+        /* 次要按钮（取消）在下方 */
         &:not(.ciallo-level-main) {
           order: 2;
         }
@@ -436,10 +472,10 @@ onUnmounted(() => {
   }
 }
 
-// 更小屏幕（手机竖屏）的进一步优化
+/* 更小屏幕（手机竖屏）的进一步优化 */
 @media (max-width: 480px) {
   .ciallo-dialog {
-    // 极小屏幕下几乎占满整个屏幕
+    /* 极小屏幕下几乎占满整个屏幕 */
     max-width: calc(100vw - #{$spacing-md * 2});
     margin: $spacing-md;
 
@@ -457,91 +493,55 @@ onUnmounted(() => {
       gap: $spacing-sm;
 
       .ciallo-button {
-        // 进一步增加按钮高度
+        /* 进一步增加按钮高度 */
         min-height: 48px;
         font-size: $font-size-lg;
         font-weight: 600;
 
-        // 在极小屏幕上也保持确定按钮的突出效果
+        /* 在极小屏幕上也保持确定按钮的突出效果 */
         &.ciallo-level-main {
-          margin-bottom: $spacing-xs;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
       }
     }
   }
 }
 
-// === 动画偏好支持 ===
-
-// 减少动画偏好用户的优化
+/* === 减少动画偏好支持 === */
 @media (prefers-reduced-motion: reduce) {
-  .ciallo-dialog {
-    &-overlay {
-      animation: none;
-    }
+  .ciallo-dialog-overlay {
+    animation: none;
+  }
 
-    &-wrapper {
-      animation: none;
-    }
+  .ciallo-dialog-wrapper {
+    animation: none;
+  }
 
-    &-close {
+  .ciallo-dialog-close {
+    transition: none;
+
+    svg {
       transition: none;
-
-      &:hover {
-        transform: none;
-      }
-
-      &:active {
-        transform: none;
-      }
     }
   }
 }
 
-// === 高对比度模式支持 ===
-
+/* === 高对比度模式支持 === */
 @media (prefers-contrast: high) {
   .ciallo-dialog {
     border: 2px solid;
+    box-shadow: none;
 
     &-header,
     &-footer {
-      border-width: 2px;
+      border-color: currentColor;
     }
 
     &-close {
-      border: 1px solid;
-    }
-  }
-}
+      border: 1px solid currentColor;
 
-// === 触摸设备优化 ===
-
-@media (hover: none) and (pointer: coarse) {
-  .ciallo-dialog {
-    &-footer {
-      .ciallo-button {
-
-        // 触摸设备上移除悬停效果，增加点击反馈
-        &:hover {
-          transform: none;
-        }
-
-        &:active {
-          transform: scale(0.98);
-          transition: transform 0.1s ease;
-        }
-      }
-    }
-
-    &-close {
-      // 触摸设备上增大关闭按钮的点击区域
-      width: 40px;
-      height: 40px;
-
-      &:active {
-        background: theme-var(background-color-base);
-        transform: scale(0.95);
+      &:focus {
+        box-shadow: 0 0 0 3px currentColor;
       }
     }
   }
