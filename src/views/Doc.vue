@@ -1,7 +1,9 @@
 <template>
   <div class="layout">
+    <!-- 顶部导航栏 -->
     <Topnav class="nav" :toggleMenuButtonVisible="showMenuButton" />
     <div class="content" :class="{ 'aside-visible': asideVisible }">
+      <!-- 侧边栏导航 -->
       <aside :class="{ 'aside-visible': asideVisible }">
         <h2>文档</h2>
         <ol>
@@ -28,7 +30,9 @@
           </li>
         </ol>
       </aside>
+      <!-- 移动端遮罩层：点击可关闭侧边栏 -->
       <div class="mask" :class="{ 'mask-visible': asideVisible && isMobile }" @click="hideAside"></div>
+      <!-- 主要内容区域 -->
       <main>
         <router-view />
       </main>
@@ -45,27 +49,34 @@ export default {
   components: { Topnav },
   setup() {
     const route = useRoute();
+    // 注入全局的侧边栏可见状态
     const asideVisible = inject<Ref<boolean>>("asideVisible", ref(false));
+    // 判断是否为移动端
     const isMobile = ref(window.innerWidth <= 500);
 
+    // 计算是否显示菜单按钮（仅移动端显示）
     const showMenuButton = computed(() => {
       return isMobile.value;
     });
 
+    // 隐藏侧边栏（移动端点击菜单项时调用）
     const hideAside = () => {
       if (window.innerWidth <= 500 && asideVisible) {
         asideVisible.value = false;
       }
     };
 
+    // 处理窗口大小变化
     const handleResize = () => {
       isMobile.value = window.innerWidth <= 500;
     };
 
+    // 监听窗口大小变化
     onMounted(() => {
       window.addEventListener("resize", handleResize);
     });
 
+    // 清理事件监听器
     onUnmounted(() => {
       window.removeEventListener("resize", handleResize);
     });
@@ -81,50 +92,60 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// 样式变量定义
 $aside-index: 10;
 $transition-duration: 0.3s;
 
+/* 整体布局容器 */
 .layout {
   display: flex;
   flex-direction: column;
   height: 100vh;
 
+  /* 顶部导航栏 */
   >.nav {
     flex-shrink: 0;
   }
 
+  /* 主要内容区域 */
   >.content {
     flex-grow: 1;
     padding-top: 60px;
     padding-left: 156px;
 
+    /* 移动端取消左边距 */
     @media (max-width: 500px) {
       padding-left: 0;
     }
   }
 }
 
+/* 内容区域布局 */
 .content {
   display: flex;
 
+  /* 侧边栏样式 */
   >aside {
     flex-shrink: 0;
     transform: translateX(-100%);
     transition: transform $transition-duration ease-in-out, background-color $transition-duration ease-in-out;
     visibility: hidden;
 
+    /* 侧边栏显示状态 */
     &.aside-visible {
       transform: translateX(0);
       visibility: visible;
     }
   }
 
+  /* 主内容区域 */
   >main {
     flex-grow: 1;
     padding: 16px;
     background: white;
   }
 
+  /* 移动端遮罩层 */
   >.mask {
     position: fixed;
     top: 0;
@@ -137,6 +158,7 @@ $transition-duration: 0.3s;
     transition: opacity $transition-duration ease-in-out;
     visibility: hidden;
 
+    /* 遮罩层显示状态 */
     &.mask-visible {
       opacity: 1;
       visibility: visible;
@@ -144,6 +166,7 @@ $transition-duration: 0.3s;
   }
 }
 
+/* 侧边栏详细样式 */
 aside {
   background: rgba(173, 216, 230, 0.95);
   width: 150px;
@@ -158,11 +181,13 @@ aside {
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
   transition: transform $transition-duration ease-in-out, background-color $transition-duration ease-in-out;
 
+  /* 侧边栏标题样式 */
   >h2 {
     margin-bottom: 4px;
     padding: 0 16px;
   }
 
+  /* 导航列表样式 */
   >ol {
     >li {
       >a {
@@ -172,6 +197,7 @@ aside {
         transition: background-color 0.3s ease-in-out;
       }
 
+      /* 当前活跃链接样式 */
       .router-link-active {
         background: rgba(255, 255, 255, 0.8);
       }
@@ -179,6 +205,7 @@ aside {
   }
 }
 
+/* 主内容区域滚动 */
 main {
   overflow: auto;
 }

@@ -1,11 +1,19 @@
 {
+    // TypeScript编译器配置选项
     "compilerOptions": {
+      // 编译目标：使用最新的ECMAScript标准
       "target": "esnext",
+      // 模块系统：使用ESNext模块
       "module": "esnext",
+      // 关闭严格模式检查（为了兼容性）
       "strict": false,
+      // JSX处理：保留JSX语法，交给其他工具处理
       "jsx": "preserve",
+      // 模块解析策略：使用Node.js风格
       "moduleResolution": "node",
+      // 允许默认导入语法糖
       "allowSyntheticDefaultImports": true,
+      // 启用ES模块互操作性
       "esModuleInterop": true
     }
 }

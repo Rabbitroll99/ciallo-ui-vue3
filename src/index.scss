@@ -1,12 +1,17 @@
+/* ===== 全局重置样式 ===== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
+/* 列表样式重置 */
 ul,
 ol {
   list-style: none;
 }
+
+/* 链接样式 */
 a {
   text-decoration: none;
   color: inherit;
@@ -15,6 +20,8 @@ a {
     cursor: pointer;
   }
 }
+
+/* 标题字体重量重置 */
 h1,
 h2,
 h3,
@@ -23,16 +30,21 @@ h5,
 h6 {
   font-weight: normal;
 }
+
+/* 全局字体和文本样式 */
 body {
   font-size: 16px;
   line-height: 1.5;
   color: #1d2c40;
+  /* 跨平台字体栈，优先使用系统字体，中文字体兼容 */
   font-family: -apple-system, "Noto Sans", "Helvetica Neue", Helvetica,
     "Nimbus Sans L", Arial, "Liberation Sans", "PingFang SC", "Hiragino Sans GB",
     "Noto Sans CJK SC", "Source Han Sans SC", "Source Han Sans CN",
     "Microsoft YaHei", "Wenquanyi Micro Hei", "WenQuanYi Zen Hei", "ST Heiti",
     SimHei, "WenQuanYi Zen Hei Sharp", sans-serif;
 }
+
+/* SVG图标通用样式 */
 .icon {
   width: 1em;
   height: 1em;
