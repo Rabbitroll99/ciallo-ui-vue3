@@ -23,6 +23,10 @@ onMounted(() => {
       if (window.location.hash.includes("/doc/")) {
         asideVisible.value = false;
       }
+    } else {
+      if (window.location.hash.includes("/doc/")) {
+        asideVisible.value = true;
+      }
     }
   });
 });
