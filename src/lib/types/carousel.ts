@@ -1,4 +1,5 @@
 export type CarouselNavigationMode = "hover" | "always";
+export type CarouselType = "default" | "card";
 
 export interface CarouselImage {
   src: string;
@@ -12,6 +13,9 @@ export interface CarouselProps {
   showIndicators?: boolean;
   showNavigation?: boolean;
   navigationMode?: CarouselNavigationMode;
+  type?: CarouselType;
+  cardWidth?: string;
+  cardScale?: number;
 }
 
 export interface CarouselEmits {

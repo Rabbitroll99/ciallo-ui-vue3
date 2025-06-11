@@ -4,6 +4,8 @@
         <Demo :component="Carousel1Demo" />
         <Demo :component="Carousel2Demo" />
         <Demo :component="Carousel3Demo" />
+        <Demo :component="Carousel4Demo" />
+        <Demo :component="Carousel5Demo" />
     </div>
 </template>
 
@@ -12,6 +14,8 @@ import Demo from "../../components/common/Demo.vue";
 import Carousel1Demo from "./Carousel1.demo.vue";
 import Carousel2Demo from "./Carousel2.demo.vue";
 import Carousel3Demo from "./Carousel3.demo.vue";
+import Carousel4Demo from "./Carousel4.demo.vue";
+import Carousel5Demo from "./Carousel5.demo.vue";
 
 export default {
     components: { Demo },
@@ -19,7 +23,9 @@ export default {
         return {
             Carousel1Demo: Carousel1Demo as any,
             Carousel2Demo: Carousel2Demo as any,
-            Carousel3Demo: Carousel3Demo as any
+            Carousel3Demo: Carousel3Demo as any,
+            Carousel4Demo: Carousel4Demo as any,
+            Carousel5Demo: Carousel5Demo as any
         };
     },
 };

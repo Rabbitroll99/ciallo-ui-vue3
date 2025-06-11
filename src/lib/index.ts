@@ -29,4 +29,5 @@ export type {
   CarouselEmits,
   CarouselImage,
   CarouselNavigationMode,
+  CarouselType,
 } from "./types/carousel";
