@@ -270,10 +270,7 @@ onUnmounted(() => {
 .ciallo-carousel {
     position: relative;
     width: 100%;
-    height: auto;
-    min-height: 200px;
-    max-height: 60vh;
-    aspect-ratio: 16/9;
+    height: 400px; // 固定一个合适的高度
     overflow: hidden;
     border-radius: $border-radius-lg;
     box-shadow: theme-var(box-shadow-base);
@@ -305,6 +302,9 @@ onUnmounted(() => {
         display: flex;
         align-items: center;
         justify-content: center;
+        background: linear-gradient(135deg,
+                theme-var(background-color-light) 0%,
+                theme-var(background-color) 100%); // 添加渐变背景
         transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 
         // 当前激活项
@@ -313,11 +313,18 @@ onUnmounted(() => {
         }
 
         img {
-            max-width: 100%;
-            max-height: 100%;
+            // 智能尺寸策略：既要充分利用空间，又要保持比例
             width: auto;
             height: auto;
-            object-fit: contain;
+            max-width: 100%;
+            max-height: 100%;
+
+            // 对于小图片，确保至少占据合理的显示空间
+            // 使用 clamp 函数实现更智能的尺寸控制
+            min-width: clamp(300px, 60%, 100%); // 最小300px，理想60%，最大100%
+            min-height: clamp(200px, 50%, 100%); // 最小200px，理想50%，最大100%
+
+            object-fit: contain; // 保持完整显示，不裁剪
             object-position: center;
             display: block;
             pointer-events: none; // 防止拖拽
@@ -445,9 +452,14 @@ onUnmounted(() => {
 // 小屏幕适配
 @media (max-width: 768px) {
     .ciallo-carousel {
-        min-height: 150px;
-        max-height: 50vh;
+        height: 250px; // 小屏幕固定高度
         border-radius: $border-radius-base;
+
+        // 小屏幕下调整图片最小尺寸
+        .ciallo-carousel-item img {
+            min-width: clamp(200px, 70%, 100%); // 小屏幕下降低最小宽度要求
+            min-height: clamp(150px, 60%, 100%); // 小屏幕下降低最小高度要求
+        }
 
         .ciallo-carousel-nav {
             width: 36px;
@@ -480,10 +492,17 @@ onUnmounted(() => {
     }
 }
 
+// 中等屏幕适配
+@media (min-width: 769px) and (max-width: 1199px) {
+    .ciallo-carousel {
+        height: 350px; // 中等屏幕高度
+    }
+}
+
 // 大屏幕优化
 @media (min-width: 1200px) {
     .ciallo-carousel {
-        height: 400px;
+        height: 450px; // 大屏幕高度
     }
 }
 
