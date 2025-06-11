@@ -29,7 +29,13 @@ export default defineConfig({
     }),
 
     // Vue Markdown插件，支持在Vue中使用Markdown
-    VueMarkdown({}),
+    VueMarkdown({
+      markdownItOptions: {
+        html: true,
+        linkify: true,
+        typographer: true,
+      },
+    }),
 
     // 自定义插件：处理demo代码块的转换
     {

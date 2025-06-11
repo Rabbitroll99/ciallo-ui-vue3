@@ -17,31 +17,4 @@
     SimHei, "WenQuanYi Zen Hei Sharp", sans-serif;
 }
 
-.ciallo-theme-provider {
-  @include component-theme-vars;
-  
-  &[data-theme="dark"] {
-    --ciallo-primary-color: #177ddc;
-    --ciallo-primary-color-hover: #40a9ff;
-    --ciallo-primary-color-active: #095aa6;
-    
-    --ciallo-success-color: #49aa19;
-    --ciallo-warning-color: #d89614;
-    --ciallo-error-color: #dc4446;
-    --ciallo-info-color: #177ddc;
-    
-    --ciallo-text-color-primary: rgba(255, 255, 255, 0.85);
-    --ciallo-text-color-secondary: rgba(255, 255, 255, 0.65);
-    --ciallo-text-color-disabled: rgba(255, 255, 255, 0.25);
-    
-    --ciallo-background-color: #141414;
-    --ciallo-background-color-light: #1f1f1f;
-    --ciallo-background-color-base: #262626;
-    
-    --ciallo-border-color-base: #434343;
-    --ciallo-border-color-light: #303030;
-    
-    --ciallo-box-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.35);
-    --ciallo-box-shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.25);
-  }
-}
+

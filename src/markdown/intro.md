@@ -1,9 +1,26 @@
 # 介绍
 
-CialloUI 是一个简洁的前端UI框架，基于 Vue3.0 的开源UI组件库.
+CialloUI 是一个简洁的 Vue 3 UI 组件库，为个人闲暇之余的练手之作，不建议应用于真实项目中。
 
-使用vite+vue3.0+typescript搭建，由Rabbitroll99开发.
+## 特性
 
-如果你不满原生样式，不必担心类名命名的问题，覆盖样式也是可以的，同时CialloUI还支持移动端的显示。
+基于 Vue 3 Composition API，使用 TypeScript 编写，支持桌面端和移动端的使用，具有简单的API设计，开箱即用。
+
+## 组件概览
+
+目前提供以下核心组件：
+
+- **Button** - 按钮组件，支持多种主题和尺寸
+- **Switch** - 开关组件，丝滑般体验的切换控件
+- **Tabs** - 标签页组件，支持内容分组展示
+- **Dialog** - 对话框组件，支持函数式调用
+- **Carousel** - 轮播图组件，支持多种展示模式
+
+## 技术栈
+
+- Vue 3 + Composition API
+- TypeScript
+- Vite
+- SCSS
 
 下一节：[安装](#/doc/install)

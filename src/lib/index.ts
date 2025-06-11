@@ -1,11 +1,10 @@
 // ===== 组件导出 =====
-export { default as Switch } from "./Switch.vue";
-export { default as Button } from "./Button.vue";
-export { default as Tabs } from "./Tabs.vue";
-export { default as Tab } from "./Tab.vue";
-export { default as Dialog } from "./Dialog.vue";
-export { default as ThemeProvider } from "./ThemeProvider.vue";
-export { default as Carousel } from "./Carousel.vue";
+export { default as Switch } from "./components/Switch/Switch.vue";
+export { default as Button } from "./components/Button/Button.vue";
+export { default as Tabs } from "./components/Tabs/Tabs.vue";
+export { default as Tab } from "./components/Tabs/Tab.vue";
+export { default as Dialog } from "./components/Dialog/Dialog.vue";
+export { default as Carousel } from "./components/Carousel/Carousel.vue";
 
 // ===== 工具函数导出 =====
 export { openDialog } from "./openDialog";
@@ -31,5 +30,3 @@ export type {
   CarouselImage,
   CarouselNavigationMode,
 } from "./types/carousel";
-// 主题相关类型
-export type { Theme } from "./ThemeProvider.vue";

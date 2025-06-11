@@ -1,4 +1,4 @@
-import Dialog from "./Dialog.vue";
+import Dialog from "./components/Dialog/Dialog.vue";
 import { createApp, h } from "vue";
 
 // 定义对话框选项的类型接口

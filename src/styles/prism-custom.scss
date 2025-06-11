@@ -1,0 +1,89 @@
+/* 自定义Prism代码高亮样式 */
+
+/* 代码块基础样式 */
+pre[class*="language-"] {
+  background: #f5f5f5 !important;
+  border: 1px solid #e1e1e1;
+  border-radius: 6px;
+  padding: 16px !important;
+  margin: 16px 0 !important;
+  overflow-x: auto;
+  font-family: 'Fira Code', 'Monaco', 'Cascadia Code', 'Consolas', 'Courier New', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+/* 行内代码样式 */
+code:not([class*="language-"]) {
+  background: #f5f5f5;
+  color: #d73a49;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Fira Code', 'Monaco', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+/* 代码块内的代码 */
+code[class*="language-"] {
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+}
+
+/* 暗色主题适配 */
+[data-theme="dark"] {
+  pre[class*="language-"] {
+    background: #1e1e1e !important;
+    border-color: #404040;
+    color: #d4d4d4 !important;
+  }
+  
+  code:not([class*="language-"]) {
+    background: #2d2d2d;
+    color: #f97583;
+  }
+}
+
+/* 语言标签（可选的增强功能） */
+pre[class*="language-"]:before {
+  content: attr(data-language);
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #666;
+  color: white;
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 0 6px 0 6px;
+}
+
+/* 特定语言的标签颜色 */
+pre.language-javascript:before { content: 'JavaScript'; background: #f7df1e; color: #000; }
+pre.language-typescript:before { content: 'TypeScript'; background: #3178c6; }
+pre.language-vue:before { content: 'Vue'; background: #4fc08d; }
+pre.language-html:before { content: 'HTML'; background: #e34f26; }
+pre.language-css:before { content: 'CSS'; background: #1572b6; }
+pre.language-scss:before { content: 'SCSS'; background: #cf649a; }
+pre.language-bash:before { content: 'Bash'; background: #4eaa25; }
+pre.language-json:before { content: 'JSON'; background: #000; }
+
+/* 滚动条美化 */
+pre[class*="language-"]::-webkit-scrollbar {
+  height: 6px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+} 
