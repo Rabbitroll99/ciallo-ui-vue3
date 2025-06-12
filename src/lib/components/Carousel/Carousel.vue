@@ -546,6 +546,7 @@ onUnmounted(() => {
     border-radius: $border-radius-lg;
     user-select: none;
     touch-action: pan-y;
+    contain: layout paint style;
 
     /* 容器基础样式 */
     &-container {
@@ -670,7 +671,7 @@ onUnmounted(() => {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        z-index: 20;
+        z-index: 5;
         width: 48px;
         height: 48px;
         background: rgba(0, 0, 0, 0.4);
