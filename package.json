@@ -1,11 +1,10 @@
 {
   "name": "ciallo-ui-vue3",
   "version": "0.0.1",
-  "type": "['dist'/lib/*]",
   "files": [
-    "dist/lib/ciallo.js"
+    "dist/lib/*"
   ],
-  "main": "dist/ciallo-ui-vue3.umd.js",
+  "main": "dist/lib/ciallo.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build"

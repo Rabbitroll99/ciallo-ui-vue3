@@ -7,7 +7,7 @@
         <h1>Ciallo(∠・ω< )⌒☆ UI</h1>
             <h2>一个基于Vue3的UI框架</h2>
             <p class="actions">
-              <a href="https://github.com">GitHub</a>
+              <a href="https://github.com/Rabbitroll99/ciallo-ui-vue3">GitHub项目地址</a>
               <router-link to="/doc">开始</router-link>
             </p>
       </div>
