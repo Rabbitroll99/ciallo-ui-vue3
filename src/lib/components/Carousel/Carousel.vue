@@ -115,7 +115,7 @@ const touchStartY = ref(0)
 const touchEndX = ref(0)
 const touchEndY = ref(0)
 const isSwiping = ref(false)
-const minSwipeDistance = 50 // 最小滑动距离
+const minSwipeDistance = ref(50) // 最小滑动距离
 
 // 图片宽高比状态
 const imageOrientations = ref<Record<number, 'landscape' | 'portrait' | 'square'>>({}) // 存储每张图片的方向
@@ -177,7 +177,7 @@ const getImageClasses = (index: number): string[] => {
 };
 
 /**
- * 获取卡片的CSS类名
+ * 获取卡片样式类
  * @param index 卡片索引
  */
 const getCardClasses = (index: number): Record<string, boolean> => {
@@ -186,14 +186,22 @@ const getCardClasses = (index: number): Record<string, boolean> => {
     const diff = index - currentIndex.value;
     const total = props.images.length;
 
-    // 处理循环位置
+    // 处理循环位置（考虑循环轮播的情况）
     const normalizedDiff = diff > total / 2 ? diff - total : diff < -total / 2 ? diff + total : diff;
 
+    // 移动端检测
+    const isMobile = window.innerWidth <= 768;
+    // 移动端显示逻辑略有不同，扩大可见卡片的范围
+    const visibilityThreshold = isMobile ? 2 : 1;
+
     return {
-        'ciallo-carousel-card-active': index === currentIndex.value,
+        'ciallo-carousel-card-active': normalizedDiff === 0,
         'ciallo-carousel-card-prev': normalizedDiff === -1,
         'ciallo-carousel-card-next': normalizedDiff === 1,
-        'ciallo-carousel-card-hidden': Math.abs(normalizedDiff) > 1
+        // 移动端下，把第二张前后卡片也显示出来，但设置更低的透明度
+        'ciallo-carousel-card-prev-2': isMobile && normalizedDiff === -2,
+        'ciallo-carousel-card-next-2': isMobile && normalizedDiff === 2,
+        'ciallo-carousel-card-hidden': Math.abs(normalizedDiff) > visibilityThreshold
     };
 };
 
@@ -210,7 +218,11 @@ const isCardVisible = (index: number): boolean => {
     // 处理循环位置
     const normalizedDiff = diff > total / 2 ? diff - total : diff < -total / 2 ? diff + total : diff;
 
-    return Math.abs(normalizedDiff) <= 1;
+    // 移动端显示更多卡片
+    const isMobile = window.innerWidth <= 768;
+    const visibilityThreshold = isMobile ? 2 : 1;
+
+    return Math.abs(normalizedDiff) <= visibilityThreshold;
 };
 
 /**
@@ -227,10 +239,25 @@ const getCardStyle = (index: number): Record<string, string> => {
     const normalizedDiff = diff > total / 2 ? diff - total : diff < -total / 2 ? diff + total : diff;
 
     const isActive = index === currentIndex.value;
-    const scale = isActive ? 1 : props.cardScale;
+    // 检测是否为移动端，移动端使用较大的缩放比例使卡片更小
+    const isMobile = window.innerWidth <= 768;
+    const isSmallMobile = window.innerWidth <= 480;
+    // 添加对中等宽度屏幕的检测，特别是900px左右的屏幕
+    const isMediumScreen = window.innerWidth > 768 && window.innerWidth <= 1024;
+    const isNarrowMedium = window.innerWidth > 768 && window.innerWidth <= 900;
+
+    // 移动端使用更大的卡片缩放差异，使非活动卡片更小
+    const scale = isActive ? 1 : (isSmallMobile ? props.cardScale * 0.9 : (isMobile ? props.cardScale * 0.95 : props.cardScale));
 
     // 获取图片信息
-    const cardWidthNum = parseInt(props.cardWidth) || 300;
+    let cardWidthNum = parseInt(props.cardWidth) || 300;
+    // 移动端对卡片宽度进行调整
+    if (isMobile) {
+        cardWidthNum = isSmallMobile ? 150 : 180;
+    } else if (isMediumScreen) {
+        // 中等屏幕宽度调整
+        cardWidthNum = isNarrowMedium ? 220 : 250;
+    }
     const orientation = imageOrientations.value[index];
 
     // 智能计算卡片间距：考虑当前图片相邻的实际图片类型
@@ -248,11 +275,16 @@ const getCardStyle = (index: number): Record<string, string> => {
         return prevImgOrientation === 'landscape' || nextImgOrientation === 'landscape';
     };
 
-    let spacingMultiplier = 0.6; // 默认间距系数
+    // 移动端使用较小的间距系数
+    let spacingMultiplier = isMobile ? 0.4 : 0.6; // 默认间距系数
+
+    // 900px左右屏幕的特殊处理
+    if (isNarrowMedium) {
+        spacingMultiplier = 0.5; // 在900px左右使用更紧凑的间距
+    }
 
     if (orientation === 'landscape') {
-        // 横板图片始终使用大间距
-        spacingMultiplier = 1.1;
+        spacingMultiplier = isMobile ? 0.8 : (isNarrowMedium ? 0.9 : 1.1);
     } else if (orientation === 'portrait' || orientation === 'square') {
         // 预先计算当前图片是否会被放大（复用后面的逻辑）
         const hasAdjacentLandscape = prevOrientation === 'landscape' || nextOrientation === 'landscape';
@@ -265,11 +297,11 @@ const getCardStyle = (index: number): Record<string, string> => {
             prevSquareEnlarged || nextSquareEnlarged;
 
         if (currentWillBeEnlarged) {
-            // 被放大的竖版/正方形图片使用接近横版的大间距
-            spacingMultiplier = 1.05;
+            // 被放大的竖版/正方形图片使用接近横版的大间距，移动端使用较小值
+            spacingMultiplier = isMobile ? 0.75 : (isNarrowMedium ? 0.85 : 1.05);
         } else {
-            // 保持默认尺寸时使用紧凑间距
-            spacingMultiplier = 0.6;
+            // 保持默认尺寸时使用紧凑间距，移动端更紧凑
+            spacingMultiplier = isMobile ? 0.3 : (isNarrowMedium ? 0.45 : 0.6);
         }
     }
 
@@ -285,7 +317,7 @@ const getCardStyle = (index: number): Record<string, string> => {
 
     if (orientation === 'landscape' && actualAspectRatio) {
         // 横板图片：增大显示尺寸，让图片更醒目
-        const scaleFactor = 1.8; // 放大系数，让横板图片更大
+        const scaleFactor = isNarrowMedium ? 1.6 : 1.8; // 900px左右的屏幕使用稍小的放大系数
         dynamicWidth = `${cardWidthNum * scaleFactor}px`;
         const calculatedHeight = (cardWidthNum * scaleFactor) / actualAspectRatio;
         dynamicHeight = `${calculatedHeight}px`;
@@ -298,16 +330,22 @@ const getCardStyle = (index: number): Record<string, string> => {
 
         if (shouldEnlarge && actualAspectRatio) {
             // 如果相邻图片中有横板，适当放大竖版图片
-            const scaleFactor = 1.3; // 增大尺寸但小于横板
+            // 在900px左右屏幕上，对竖版卡片使用更保守的放大系数
+            const scaleFactor = isNarrowMedium ? 1.1 : 1.3;
             dynamicWidth = `${cardWidthNum * scaleFactor}px`;
             // 保持宽高比
             const calculatedHeight = (cardWidthNum * scaleFactor) / actualAspectRatio;
             dynamicHeight = `${calculatedHeight}px`;
         } else if (actualAspectRatio) {
             // 标准尺寸，但保持宽高比
-            dynamicWidth = props.cardWidth;
-            const calculatedHeight = parseInt(props.cardWidth) / actualAspectRatio;
-            dynamicHeight = `${calculatedHeight}px`;
+            dynamicWidth = `${cardWidthNum}px`;
+            const calculatedHeight = cardWidthNum / actualAspectRatio;
+            // 在900px左右屏幕上，限制竖版卡片的最大高度，避免过高
+            if (isNarrowMedium && calculatedHeight > cardWidthNum * 1.5) {
+                dynamicHeight = `${cardWidthNum * 1.5}px`;
+            } else {
+                dynamicHeight = `${calculatedHeight}px`;
+            }
         }
     } else if (orientation === 'square') {
         // 正方形图片：智能尺寸调整
@@ -318,13 +356,13 @@ const getCardStyle = (index: number): Record<string, string> => {
 
         if (shouldEnlarge) {
             // 如果相邻图片中有横板，适当放大正方形图片
-            const scaleFactor = 1.2;
+            const scaleFactor = isNarrowMedium ? 1.1 : 1.2;
             dynamicWidth = `${cardWidthNum * scaleFactor}px`;
             dynamicHeight = `${cardWidthNum * scaleFactor}px`;
         } else {
             // 标准尺寸
-            dynamicWidth = props.cardWidth;
-            dynamicHeight = props.cardWidth;
+            dynamicWidth = `${cardWidthNum}px`;
+            dynamicHeight = `${cardWidthNum}px`;
         }
     }
 
@@ -457,7 +495,7 @@ const handleMouseLeave = (): void => {
  * @param event 触摸事件
  */
 const handleTouchStart = (event: TouchEvent): void => {
-    // 自动播放模式下，触摸开始暂停播放
+    // 自动播放模式下，暂停播放
     if (props.autoplay) {
         stopAutoplay();
     }
@@ -465,7 +503,12 @@ const handleTouchStart = (event: TouchEvent): void => {
     const touch = event.touches[0];
     touchStartX.value = touch.clientX;
     touchStartY.value = touch.clientY;
+    touchEndX.value = touch.clientX; // 初始化结束位置为开始位置
+    touchEndY.value = touch.clientY;
     isSwiping.value = true;
+
+    // 阻止页面滚动，仅当水平滑动距离大于垂直滑动时
+    event.preventDefault();
 };
 
 /**
@@ -478,6 +521,15 @@ const handleTouchMove = (event: TouchEvent): void => {
     const touch = event.touches[0];
     touchEndX.value = touch.clientX;
     touchEndY.value = touch.clientY;
+
+    // 计算水平和垂直方向的滑动距离
+    const deltaX = touchEndX.value - touchStartX.value;
+    const deltaY = touchEndY.value - touchStartY.value;
+
+    // 如果水平滑动距离大于垂直滑动距离，阻止页面滚动
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        event.preventDefault();
+    }
 };
 
 /**
@@ -491,7 +543,7 @@ const handleTouchEnd = (): void => {
     const deltaY = touchEndY.value - touchStartY.value;
 
     // 如果水平滑动距离大于垂直滑动距离且大于最小滑动距离，则认为是有效的水平滑动
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance.value) {
         if (deltaX > 0) {
             // 向右滑动，切换到上一张
             prevSlide();
@@ -513,6 +565,11 @@ const handleTouchEnd = (): void => {
 // ===== 生命周期钩子 =====
 
 onMounted(() => {
+    // 检测是否为移动设备，为移动端设置更小的滑动阈值
+    if (window.innerWidth <= 768) {
+        minSwipeDistance.value = 30; // 移动端使用更小的滑动阈值
+    }
+
     // 自动播放模式下，组件挂载后开始播放
     if (props.autoplay) {
         startAutoplay();
@@ -527,6 +584,24 @@ onMounted(() => {
 onUnmounted(() => {
     // 组件卸载时，清理计时器
     stopAutoplay();
+    // 移除resize事件监听
+    window.removeEventListener('resize', () => { });
+});
+
+// 检测设备方向变化，更新布局
+window.addEventListener('resize', () => {
+    // 如果是卡片模式，当设备方向变化时重新计算布局
+    if (props.type === 'card') {
+        // 简单延迟确保DOM已更新
+        setTimeout(() => {
+            // 重置滑动阈值
+            if (window.innerWidth <= 768) {
+                minSwipeDistance.value = 30;
+            } else {
+                minSwipeDistance.value = 50;
+            }
+        }, 300);
+    }
 });
 </script>
 
@@ -597,6 +672,8 @@ onUnmounted(() => {
         height: 100%;
         perspective: 1200px;
         overflow: visible;
+        touch-action: pan-y pinch-zoom;
+        /* 优化触摸体验 */
     }
 
     &-card-item {
@@ -633,6 +710,19 @@ onUnmounted(() => {
         &.ciallo-carousel-card-next {
             z-index: 5;
             opacity: 0.7;
+            pointer-events: auto;
+        }
+
+        /* 移动端额外显示的卡片 */
+        &.ciallo-carousel-card-prev-2 {
+            z-index: 2;
+            opacity: 0.4;
+            pointer-events: auto;
+        }
+
+        &.ciallo-carousel-card-next-2 {
+            z-index: 2;
+            opacity: 0.4;
             pointer-events: auto;
         }
 
@@ -802,6 +892,8 @@ onUnmounted(() => {
         height: 250px;
         /* 小屏幕固定高度 */
         border-radius: $border-radius-base;
+        touch-action: pan-y;
+        /* 移动端优化滑动体验 */
 
         /* 小屏幕下调整图片最小尺寸 */
         .ciallo-carousel-item img {
@@ -813,9 +905,40 @@ onUnmounted(() => {
 
         /* 小屏幕下的卡片样式调整 */
         .ciallo-carousel-card-item {
-            width: 200px;
-            /* 小屏幕下的卡片宽度 */
+            width: 180px;
+            /* 调整小屏幕下的卡片宽度，更小以适应移动端 */
             height: 70%;
+            transform-origin: center center;
+            /* 确保变换原点居中 */
+            transition: all 0.4s ease-out;
+            /* 移动端使用更快的过渡效果 */
+
+            /* 移动端卡片边缘处理 */
+            &.ciallo-carousel-card-prev,
+            &.ciallo-carousel-card-next {
+                opacity: 0.65;
+                /* 降低相邻卡片的不透明度 */
+            }
+
+            &.ciallo-carousel-card-prev-2,
+            &.ciallo-carousel-card-next-2 {
+                opacity: 0.35;
+                /* 降低第二相邻卡片的不透明度 */
+            }
+        }
+
+        /* 卡片模式下的容器调整 */
+        .ciallo-carousel-container-card {
+            overflow: hidden;
+            /* 移动端卡片模式隐藏溢出部分 */
+            padding: 0 $spacing-xs;
+            /* 增加一些内边距 */
+        }
+
+        /* 卡片图片样式移动端优化 */
+        .ciallo-carousel-card-item img {
+            object-position: center;
+            /* 确保图片居中对齐 */
         }
 
         .ciallo-carousel-nav {
@@ -859,6 +982,31 @@ onUnmounted(() => {
     }
 }
 
+/* 极小屏幕适配 - 添加对更小屏幕的支持 */
+@media (max-width: 480px) {
+    .ciallo-carousel {
+        height: 220px;
+        /* 进一步降低极小屏幕高度 */
+
+        .ciallo-carousel-card-item {
+            width: 150px;
+            /* 更小的卡片宽度 */
+            height: 75%;
+            /* 稍微增加高度比例 */
+        }
+
+        &.ciallo-carousel-card {
+            .ciallo-carousel-nav-prev {
+                left: $spacing-sm;
+            }
+
+            .ciallo-carousel-nav-next {
+                right: $spacing-sm;
+            }
+        }
+    }
+}
+
 /* 中等屏幕适配 */
 @media (min-width: 769px) and (max-width: 1199px) {
     .ciallo-carousel {
@@ -868,6 +1016,40 @@ onUnmounted(() => {
         .ciallo-carousel-card-item {
             width: 250px;
             /* 中等屏幕下的卡片宽度 */
+        }
+    }
+}
+
+/* 添加对900px左右屏幕的特殊处理 */
+@media (min-width: 769px) and (max-width: 900px) {
+    .ciallo-carousel {
+        height: 320px;
+        /* 调整900px左右屏幕的高度 */
+
+        .ciallo-carousel-card-item {
+            width: 220px;
+            /* 调整900px左右屏幕的卡片宽度 */
+            height: 75%;
+            /* 调整高度比例，避免竖版卡片过高 */
+
+            /* 调整卡片图片在900px宽度下的显示 */
+            img.portrait {
+                object-fit: cover;
+                /* 在较窄的中等屏幕上使用cover而非contain，避免过高 */
+                object-position: center;
+            }
+
+            /* 竖版卡片在此宽度下的特殊处理 */
+            &.portrait {
+                max-height: 300px;
+                /* 限制最大高度 */
+            }
+        }
+
+        /* 调整卡片容器样式 */
+        .ciallo-carousel-container-card {
+            overflow: hidden;
+            /* 隐藏溢出部分，防止竖版卡片太高导致的布局问题 */
         }
     }
 }
@@ -934,6 +1116,36 @@ onUnmounted(() => {
         border: 1px solid ButtonText;
         background: ButtonFace;
         color: ButtonText;
+    }
+}
+
+/* 横屏模式的移动设备优化 */
+@media (max-width: 1024px) and (orientation: landscape) {
+    .ciallo-carousel {
+        height: 200px;
+        /* 横屏模式下降低高度 */
+
+        .ciallo-carousel-card-item {
+            width: 200px;
+            /* 横屏模式适当增加宽度 */
+            height: 85%;
+            /* 增加高度占比 */
+        }
+
+        &.ciallo-carousel-card {
+            .ciallo-carousel-nav-prev {
+                left: $spacing-md;
+            }
+
+            .ciallo-carousel-nav-next {
+                right: $spacing-md;
+            }
+        }
+
+        .ciallo-carousel-indicators {
+            bottom: $spacing-xs;
+            /* 减小底部边距 */
+        }
     }
 }
 </style>
